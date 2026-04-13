@@ -256,6 +256,49 @@ const server = http.createServer(async (req, res) => {
         });
     }
 
+    // POST /api/chat — voice question from TV dashboard
+    if (p === '/api/chat' && req.method === 'POST') {
+        const body = await parseBody(req);
+        const question = body.question || '';
+        const sessionCode = body.code || '';
+        const s = sessions.get(sessionCode);
+
+        // Build context from session state
+        let context = 'No active workout.';
+        if (s && s.active) {
+            context = `Active workout: ${s.exercise}. Reps completed: ${s.reps}. `
+                + `Current form: ${s.formScore || 'unknown'}. `
+                + `Recent feedback: ${s.feedback.slice(0,3).map(f=>f.text).join('; ')}`;
+        }
+
+        try {
+            const prompt = `You are CouchCoach, a friendly AI fitness coach. The user is mid-workout and just asked you a question via voice.
+
+Workout context: ${context}
+
+User said: "${question}"
+
+Respond in 1-2 short sentences. Be conversational, warm, and helpful. No emojis. Speak as if talking to them in person.`;
+
+            const cmd = new InvokeModelCommand({
+                modelId: 'anthropic.claude-3-haiku-20240307-v1:0',
+                contentType: 'application/json',
+                body: JSON.stringify({
+                    anthropic_version: 'bedrock-2023-05-31',
+                    max_tokens: 80,
+                    messages: [{ role: 'user', content: prompt }]
+                }),
+            });
+            const resp = await bedrock.send(cmd);
+            const result = JSON.parse(new TextDecoder().decode(resp.body));
+            const answer = result.content[0].text.trim();
+            return json(res, 200, { answer });
+        } catch (e) {
+            console.error('Chat error:', e.message);
+            return json(res, 200, { answer: "Sorry, I didn't catch that. Keep going, you're doing great." });
+        }
+    }
+
     // GET /api/speech?text=... — convert text to speech via Polly
     if (p === '/api/speech' && req.method === 'GET') {
         const text = url.searchParams.get('text');

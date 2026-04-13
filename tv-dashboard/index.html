@@ -114,7 +114,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
       <div class="tl-list" id="tl"><div class="tl-empty">Coaching feedback will appear here</div></div>
     </div>
   </div>
-  <div class="voice">Try saying: <span>"Alexa, how's my form?"</span></div>
+  <div class="voice">Say <span>"Coach"</span> followed by your question</div>
+  <div id="micStatus" class="voice" style="color:var(--dm)">🎤 Mic: starting...</div>
   <div id="voiceNote" class="voice" style="display:none;color:var(--y);cursor:pointer" onclick="unlockAudio()">🔊 Tap anywhere to enable voice coaching</div>
 </div>
 
@@ -159,9 +160,10 @@ async function checkPair(){
 function goDash(){
   document.getElementById('pair').classList.remove('on');
   document.getElementById('dash').classList.add('on');
-  // Unlock audio by playing a silent sound on user interaction
   document.getElementById('dash').addEventListener('click', unlockAudio, {once:true});
   document.getElementById('voiceNote').style.display='block';
+  // Start always-on voice input
+  setTimeout(startListening, 1000);
 }
 
 function unlockAudio(){
@@ -220,6 +222,99 @@ function renderTL(items){
     const t=new Date(i.time).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'});
     return`<div class="tl-i"><div class="tl-d ${i.score}"></div><div><div class="tl-t">${i.text}</div><div class="tl-tm">${t}</div></div></div>`;
   }).join('');
+}
+
+// ══════════════════════════════════════
+// VOICE INPUT (always-on, "coach" wake word)
+// ══════════════════════════════════════
+let recognition = null;
+let micReady = false;
+
+function startListening() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+        document.getElementById('micStatus').textContent = '🎤 Voice not supported in this browser';
+        return;
+    }
+    recognition = new SR();
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+        micReady = true;
+        document.getElementById('micStatus').textContent = '🎤 Listening — say "Coach" to ask a question';
+        document.getElementById('micStatus').style.color = 'var(--g)';
+    };
+
+    recognition.onresult = (e) => {
+        const last = e.results[e.results.length - 1];
+        if (!last.isFinal) return;
+        const transcript = last[0].transcript.trim().toLowerCase();
+        if (transcript.includes('coach')) {
+            const parts = transcript.split('coach');
+            const question = parts.slice(1).join('coach').trim();
+            if (question.length > 2) {
+                handleVoiceQuestion(question);
+            } else {
+                speakFeedback("I'm here. What do you need?");
+            }
+        }
+    };
+
+    recognition.onerror = (e) => {
+        if (e.error === 'not-allowed') {
+            document.getElementById('micStatus').textContent = '🎤 Mic blocked — allow microphone access';
+            document.getElementById('micStatus').style.color = 'var(--r)';
+            return;
+        }
+        setTimeout(restartListening, 1000);
+    };
+
+    recognition.onend = () => {
+        if (micReady && !speaking) setTimeout(restartListening, 300);
+    };
+
+    recognition.start();
+}
+
+function restartListening() {
+    try { if (recognition) recognition.start(); }
+    catch (e) { setTimeout(restartListening, 1000); }
+}
+
+async function handleVoiceQuestion(question) {
+    document.getElementById('micStatus').textContent = '🎤 "' + question + '" — thinking...';
+    document.getElementById('micStatus').style.color = 'var(--y)';
+    try { recognition.stop(); } catch(e) {}
+
+    try {
+        const r = await fetch(API + '/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question, code })
+        });
+        const d = await r.json();
+        const hero = document.getElementById('hero');
+        const htxt = document.getElementById('htxt');
+        const hwait = document.getElementById('hwait');
+        const hex = document.getElementById('hex');
+        hwait.style.display = 'none';
+        htxt.style.display = 'block';
+        htxt.textContent = d.answer;
+        hex.textContent = 'COACH';
+        hero.className = 'hero good';
+        lastSpokenFeedback = '';
+        await speakFeedback(d.answer);
+    } catch (e) {
+        await speakFeedback("Sorry, I didn't catch that. Try again.");
+    }
+
+    document.getElementById('micStatus').textContent = '🎤 Listening — say "Coach" to ask a question';
+    document.getElementById('micStatus').style.color = 'var(--g)';
+    const wait = setInterval(() => {
+        if (!speaking) { clearInterval(wait); restartListening(); }
+    }, 300);
 }
 
 init();
