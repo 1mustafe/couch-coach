@@ -69,6 +69,8 @@ Respond with EXACTLY this JSON, nothing else:
 Rules for the text field:
 - Write as if you are speaking directly to the person mid-workout
 - No emojis, no special characters, no exclamation marks
+- No stage directions like *chuckles* or *clears throat* or any text in asterisks
+- Just plain spoken words, nothing else
 - Sound like a calm, encouraging personal trainer
 - Examples: "Nice depth, now push those knees out", "Tighten your core, hips are dropping a bit"
 
@@ -278,7 +280,7 @@ Workout context: ${context}
 
 User said: "${question}"
 
-Respond in 1-2 short sentences. Be conversational, warm, and helpful. No emojis. Speak as if talking to them in person.`;
+Respond in 1-2 short sentences. Be conversational, warm, and helpful. No emojis. No stage directions like *chuckles* or actions in asterisks. Just plain spoken words. Speak as if talking to them in person.`;
 
             const cmd = new InvokeModelCommand({
                 modelId: 'anthropic.claude-3-haiku-20240307-v1:0',
@@ -307,6 +309,7 @@ Respond in 1-2 short sentences. Be conversational, warm, and helpful. No emojis.
             // Strip emojis and clean up for natural speech
             const clean = text
                 .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE00}-\u{FE0F}\u{1F900}-\u{1F9FF}\u{200D}\u{20E3}\u{E0020}-\u{E007F}]/gu, '')
+                .replace(/\*[^*]+\*/g, '')
                 .replace(/\s+/g, ' ')
                 .trim();
 
