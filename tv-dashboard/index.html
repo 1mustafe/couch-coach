@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CouchCoach</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#09090b;--sf:#111113;--bd:#1c1c1e;
+  --tx:#e4e4e7;--dm:#52525b;
+  --g:#4ade80;--y:#facc15;--r:#f87171;
+  --mn:'SF Mono','Fira Code','Consolas',monospace;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:var(--bg);color:var(--tx);height:100vh;overflow:hidden}
+.s{display:none;height:100vh}.s.on{display:flex}
+
+/* ── PAIR ── */
+.pair{flex-direction:column;align-items:center;justify-content:center;gap:40px;text-align:center}
+.p-brand{font-family:var(--mn);font-size:18px;font-weight:700;letter-spacing:5px;
+  text-transform:uppercase;color:var(--g)}
+.p-sub{font-size:20px;color:var(--dm);font-weight:400}
+.p-code{font-family:var(--mn);font-size:min(12vw,120px);font-weight:800;
+  letter-spacing:12px;color:var(--tx);padding:24px 48px;
+  background:var(--sf);border:1px solid var(--bd);border-radius:20px}
+.p-wait{display:flex;align-items:center;gap:10px;color:var(--dm);font-size:15px}
+.spin{width:14px;height:14px;border:2px solid var(--bd);border-top-color:var(--g);
+  border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ── DASH ── */
+.dash{flex-direction:column;padding:36px 48px;gap:28px}
+.d-head{display:flex;justify-content:space-between;align-items:center}
+.d-logo{font-family:var(--mn);font-size:13px;font-weight:700;
+  letter-spacing:3px;text-transform:uppercase;color:var(--g)}
+.d-live{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--dm)}
+.dot{width:10px;height:10px;border-radius:50%}
+.dot.on{background:var(--g);box-shadow:0 0 10px var(--g);animation:pu 2s infinite}
+.dot.off{background:var(--dm)}
+@keyframes pu{0%,100%{opacity:1}50%{opacity:.35}}
+
+.d-body{flex:1;display:flex;gap:24px;min-height:0}
+
+/* Main */
+.main{flex:2.2;display:flex;flex-direction:column;gap:20px}
+.hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:var(--sf);border:1px solid var(--bd);border-radius:16px;
+  padding:40px;text-align:center;transition:border-color .4s}
+.hero.good{border-color:var(--g)}.hero.warning{border-color:var(--y)}.hero.bad{border-color:var(--r)}
+.hero-txt{font-size:min(4vw,38px);font-weight:600;line-height:1.3;max-width:640px}
+.hero-ex{font-family:var(--mn);font-size:12px;color:var(--dm);
+  text-transform:uppercase;letter-spacing:2px;margin-top:14px}
+.hero-wait{font-size:min(3vw,28px);color:var(--dm);font-weight:400}
+
+.cards{display:flex;gap:14px}
+.card{flex:1;background:var(--sf);border:1px solid var(--bd);border-radius:14px;
+  padding:20px;text-align:center}
+.card-n{font-family:var(--mn);font-size:min(5vw,52px);font-weight:800}
+.card-l{font-size:11px;color:var(--dm);text-transform:uppercase;letter-spacing:2px;margin-top:4px}
+
+/* Timeline */
+.tl{flex:1;background:var(--sf);border:1px solid var(--bd);border-radius:16px;
+  padding:20px;overflow-y:auto;display:flex;flex-direction:column}
+.tl-h{font-family:var(--mn);font-size:10px;color:var(--dm);
+  text-transform:uppercase;letter-spacing:2px;margin-bottom:14px}
+.tl-list{flex:1;display:flex;flex-direction:column;gap:10px}
+.tl-i{display:flex;align-items:flex-start;gap:10px;padding:10px;
+  border-radius:8px;background:rgba(255,255,255,.02)}
+.tl-d{width:7px;height:7px;border-radius:50%;margin-top:6px;flex-shrink:0}
+.tl-d.good{background:var(--g)}.tl-d.warning{background:var(--y)}.tl-d.bad{background:var(--r)}
+.tl-t{font-size:13px;line-height:1.4}
+.tl-tm{font-family:var(--mn);font-size:10px;color:var(--dm);margin-top:2px}
+.tl-empty{color:var(--dm);font-size:13px;text-align:center;margin-top:36px}
+
+.voice{text-align:center;font-size:12px;color:var(--dm);padding-top:4px}
+.voice span{color:var(--g)}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bd);border-radius:4px}
+</style>
+</head>
+<body>
+
+<div id="pair" class="s pair on">
+  <div class="p-brand">CouchCoach</div>
+  <div class="p-sub">Enter this code on your phone</div>
+  <div class="p-code" id="code">· · ·</div>
+  <div class="p-wait"><div class="spin"></div><span>Waiting for phone to connect…</span></div>
+</div>
+
+<div id="dash" class="s dash">
+  <div class="d-head">
+    <div class="d-logo">CouchCoach</div>
+    <div class="d-live"><div class="dot" id="dot"></div><span id="lbl">Connected</span></div>
+  </div>
+  <div class="d-body">
+    <div class="main">
+      <div class="hero" id="hero">
+        <div class="hero-wait" id="hwait">Ready to start workout</div>
+        <div class="hero-txt" id="htxt" style="display:none"></div>
+        <div class="hero-ex" id="hex"></div>
+      </div>
+      <div class="cards">
+        <div class="card"><div class="card-n" id="tReps">0</div><div class="card-l">Reps</div></div>
+        <div class="card"><div class="card-n" id="tScore">—</div><div class="card-l">Form</div></div>
+        <div class="card"><div class="card-n" id="tTime">0:00</div><div class="card-l">Time</div></div>
+      </div>
+    </div>
+    <div class="tl">
+      <div class="tl-h">Activity Feed</div>
+      <div class="tl-list" id="tl"><div class="tl-empty">Coaching feedback will appear here</div></div>
+    </div>
+  </div>
+  <div class="voice">Try saying: <span>"Alexa, how's my form?"</span></div>
+  <div id="voiceNote" class="voice" style="display:none;color:var(--y);cursor:pointer" onclick="unlockAudio()">🔊 Tap anywhere to enable voice coaching</div>
+</div>
+
+<script>
+const API=location.origin;
+let code=null,poll=null,lastN=0;
+let lastSpokenFeedback='';
+let speaking=false;
+
+// Speak feedback via Polly
+async function speakFeedback(text){
+  if(speaking||!text||text===lastSpokenFeedback)return;
+  lastSpokenFeedback=text;
+  speaking=true;
+  try{
+    const url=API+'/api/speech?text='+encodeURIComponent(text);
+    const audio=new Audio(url);
+    audio.onended=()=>{speaking=false};
+    audio.onerror=()=>{speaking=false};
+    await audio.play();
+  }catch(e){speaking=false}
+}
+
+async function init(){
+  try{
+    const r=await fetch(API+'/api/session/create',{method:'POST'});
+    const d=await r.json();
+    code=d.code;
+    document.getElementById('code').textContent=code.slice(0,3)+' '+code.slice(3);
+    poll=setInterval(checkPair,1500);
+  }catch(e){document.getElementById('code').textContent='ERR'}
+}
+
+async function checkPair(){
+  try{
+    const r=await fetch(API+'/api/session/state?code='+code);
+    const d=await r.json();
+    if(d.paired){clearInterval(poll);goDash();poll=setInterval(pollState,800)}
+  }catch(e){}
+}
+
+function goDash(){
+  document.getElementById('pair').classList.remove('on');
+  document.getElementById('dash').classList.add('on');
+  // Unlock audio by playing a silent sound on user interaction
+  document.getElementById('dash').addEventListener('click', unlockAudio, {once:true});
+  document.getElementById('voiceNote').style.display='block';
+}
+
+function unlockAudio(){
+  const a=new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
+  a.play().then(()=>{
+    document.getElementById('voiceNote').style.display='none';
+  }).catch(()=>{});
+}
+
+async function pollState(){
+  try{
+    const r=await fetch(API+'/api/session/state?code='+code);
+    const d=await r.json();
+    const dot=document.getElementById('dot'),lbl=document.getElementById('lbl');
+    if(d.active){dot.className='dot on';lbl.textContent=d.exercise.toUpperCase()+' · Live'}
+    else{dot.className='dot off';lbl.textContent='Connected · Idle'}
+
+    document.getElementById('tReps').textContent=d.reps||0;
+    updScore(d.formScore);
+
+    if(d.elapsed>0){
+      const s=Math.floor(d.elapsed/1000),m=Math.floor(s/60);
+      document.getElementById('tTime').textContent=m+':'+String(s%60).padStart(2,'0');
+    }
+
+    const hero=document.getElementById('hero'),htxt=document.getElementById('htxt');
+    const hwait=document.getElementById('hwait'),hex=document.getElementById('hex');
+    if(d.lastAnalysis){
+      hwait.style.display='none';htxt.style.display='block';
+      htxt.textContent=d.lastAnalysis.feedback;hex.textContent=d.exercise;
+      hero.className='hero '+(d.lastAnalysis.score||'');
+      // Speak the feedback
+      speakFeedback(d.lastAnalysis.feedback);
+    }else if(d.active){
+      hwait.textContent='Analyzing your form…';hwait.style.display='block';
+      htxt.style.display='none';hero.className='hero';
+    }else{
+      hwait.textContent='Ready to start workout';hwait.style.display='block';
+      htxt.style.display='none';hero.className='hero';
+    }
+
+    if(d.feedback&&d.feedback.length!==lastN){lastN=d.feedback.length;renderTL(d.feedback)}
+  }catch(e){}
+}
+
+function updScore(sc){
+  const el=document.getElementById('tScore');
+  const m={good:'✓',warning:'~',bad:'✗'},c={good:'var(--g)',warning:'var(--y)',bad:'var(--r)'};
+  el.textContent=m[sc]||'—';el.style.color=c[sc]||'var(--tx)';
+}
+
+function renderTL(items){
+  const tl=document.getElementById('tl');
+  if(!items.length){tl.innerHTML='<div class="tl-empty">Coaching feedback will appear here</div>';return}
+  tl.innerHTML=items.map(i=>{
+    const t=new Date(i.time).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    return`<div class="tl-i"><div class="tl-d ${i.score}"></div><div><div class="tl-t">${i.text}</div><div class="tl-tm">${t}</div></div></div>`;
+  }).join('');
+}
+
+init();
+</script>
+</body>
+</html>
