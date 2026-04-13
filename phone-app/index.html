@@ -165,6 +165,8 @@ let repData = { snapshots: [], issues: [], hadBadForm: false };
 let lastFormCheckTime = 0;
 let angleHistory = [];
 let failedRepCooldown = 0;
+let silLockStart = 0; // timestamp when all points first locked
+let autoStarting = false;
 
 const KP = {
     NOSE:0, L_EYE:1, R_EYE:2, L_EAR:3, R_EAR:4,
@@ -420,10 +422,28 @@ function updateSilhouette(kps) {
     overlay.style.display = 'flex';
     const required = [KP.L_SHOULDER, KP.R_SHOULDER, KP.L_HIP, KP.R_HIP, KP.L_KNEE, KP.R_KNEE];
     const visible = required.filter(i => kps[i].score > 0.4).length;
+
     if (visible >= 5) {
-        msg.textContent = '✓ Position locked — ready to start';
-        msg.classList.add('ready');
+        const now = Date.now();
+        if (silLockStart === 0) silLockStart = now;
+        const elapsed = (now - silLockStart) / 1000;
+        const remaining = Math.ceil(3 - elapsed);
+
+        if (elapsed >= 3 && !autoStarting) {
+            // Auto-start the workout
+            autoStarting = true;
+            msg.textContent = '✓ Calibrated — starting workout';
+            msg.classList.add('ready');
+            setTimeout(() => { autoStarting = false; toggle(); }, 500);
+        } else if (!autoStarting) {
+            msg.textContent = remaining > 0
+                ? 'Hold still — calibrating... ' + remaining + 's'
+                : '✓ Locked in — starting...';
+            msg.classList.add('ready');
+        }
     } else {
+        silLockStart = 0;
+        autoStarting = false;
         msg.textContent = 'Move back so your full body is visible (' + visible + '/6 points)';
         msg.classList.remove('ready');
     }
@@ -684,6 +704,7 @@ async function toggle() {
         });
         on = false; btn.textContent = 'Start Workout'; btn.className = 'act go';
         clearInterval(tmInt);
+        silLockStart = 0; autoStarting = false;
         document.getElementById('toast').classList.remove('vis');
         document.getElementById('angleBadge').style.display = 'none';
     }
