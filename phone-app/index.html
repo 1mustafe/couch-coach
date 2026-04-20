@@ -279,7 +279,7 @@ const EX_CONFIG = {
 // ══════════════════════════════════════
 // PAIRING
 // ══════════════════════════════════════
-const cis = document.querySelectorAll('.ci');
+const cis = document.querySelectorAll('#codeRow input');
 cis.forEach((inp, i) => {
     inp.addEventListener('input', () => {
         inp.value = inp.value.replace(/\D/g, '');
