@@ -310,7 +310,13 @@ async function doPair() {
         const d = await r.json();
         if (!r.ok) { err.textContent = 'Invalid code. Check your TV and try again.'; return; }
         sid = d.sessionId;
-        goWorkout();
+        // Show connected state
+        const btn = document.getElementById('pBtn');
+        btn.textContent = '✓ Connected';
+        btn.classList.remove('bg-app-cyan', 'text-app-bg');
+        btn.classList.add('bg-green-500/20', 'text-green-400', 'border', 'border-green-500/30');
+        err.innerHTML = '<span class="text-green-400">Linked to your Fire TV</span>';
+        setTimeout(goWorkout, 1200);
     } catch (e) { err.textContent = 'Cannot reach server. Same WiFi as your TV?'; }
 }
 
