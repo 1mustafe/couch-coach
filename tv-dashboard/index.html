@@ -430,7 +430,7 @@
             <div class="absolute bottom-0 inset-x-0 p-10 lg:p-14 pb-12 flex items-end justify-between z-10 pointer-events-none">
                 <div class="flex flex-col w-48">
                     <span class="text-slate-400 text-xs font-bold tracking-[0.4em] uppercase mb-2 ml-1">Form Score</span>
-                    <span class="font-display text-8xl font-light text-white leading-none hud-text-shadow"><span id="hud-form">94</span><span class="text-2xl text-slate-500 ml-1 font-bold">%</span></span>
+                    <span class="font-display text-8xl font-light text-white leading-none hud-text-shadow"><span id="hud-form">—</span><span class="text-2xl text-slate-500 ml-1 font-bold" id="hud-form-pct"></span></span>
                 </div>
 
                 <div class="flex flex-col items-center transform translate-y-4">
@@ -441,7 +441,7 @@
                     </div>
                 </div>
 
-                <div class="flex flex-col items-end w-48">
+                <div class="flex flex-col items-end w-48" style="display:none;">
                     <span class="text-slate-400 text-xs font-bold tracking-[0.4em] uppercase mb-2 text-right mr-1">Sets</span>
                     <span class="font-display text-8xl font-light text-white leading-none text-right hud-text-shadow"><span id="hud-sets">1</span><span class="text-2xl text-slate-500 ml-2 font-bold uppercase">/ 4</span></span>
                 </div>
@@ -1012,7 +1012,7 @@
                 } else {
                     document.getElementById('hud-center-label').innerText = "REP COUNT";
                     document.getElementById('hud-center-val').innerText = "0";
-                    document.getElementById('hud-center-sub').innerText = `/ ${ex.reps.split('-').pop()}`; // take upper range
+                    document.getElementById('hud-center-sub').innerText = '';
                 }
             },
 
@@ -1043,7 +1043,8 @@
                             // Update form score
                             if(d.formScore) {
                                 const scoreMap = {good:98, warning:78, bad:55};
-                                document.getElementById('hud-form').innerText = scoreMap[d.formScore] || 94;
+                                document.getElementById('hud-form').innerText = scoreMap[d.formScore] || '—';
+                                document.getElementById('hud-form-pct').innerText = d.formScore ? '%' : '';
                             }
                             // Show AI feedback from Bedrock
                             if(d.lastAnalysis && d.lastAnalysis.feedback && d.lastAnalysis.feedback !== this._lastFeedback) {

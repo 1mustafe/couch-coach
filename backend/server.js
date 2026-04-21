@@ -9,6 +9,8 @@ const bedrock = new BedrockRuntimeClient({ region: 'us-east-1' });
 const polly = new PollyClient({ region: 'us-east-1' });
 
 const sessions = new Map();
+// Pre-create phone session so TV can poll immediately
+sessions.set('phone', { id: 'phone', code: 'phone', paired: true, active: true, exercise: 'pushup', reps: 0, formScore: null, feedback: [], lastAnalysis: null, elapsedStart: Date.now() });
 
 function genCode() {
     return Math.floor(100000 + Math.random() * 900000).toString();
