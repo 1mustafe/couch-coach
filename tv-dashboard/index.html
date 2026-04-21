@@ -457,9 +457,9 @@
 
             <!-- AI Feedback Floating Banner (Centered above dashboard) -->
             <div class="relative z-10 flex-1 flex flex-col items-center justify-end pb-8">
-                 <!-- Alexa Blue Ring -->
-                 <div id="alexa-ring" class="mb-6 w-20 h-20 rounded-full border-4 border-blue-500 opacity-0 transition-opacity duration-300 flex items-center justify-center" style="box-shadow: 0 0 30px rgba(59,130,246,0.5), inset 0 0 20px rgba(59,130,246,0.2);">
-                     <div class="w-14 h-14 rounded-full border-2 border-blue-400 animate-ping opacity-30"></div>
+                 <!-- Alexa Light Bar (bottom of screen) -->
+                 <div id="alexa-ring" class="fixed bottom-0 left-0 right-0 h-1.5 z-[90] opacity-0 transition-opacity duration-300">
+                     <div class="h-full w-full bg-gradient-to-r from-transparent via-blue-500 to-transparent animate-pulse" style="box-shadow: 0 0 20px rgba(59,130,246,0.8), 0 0 60px rgba(59,130,246,0.4);"></div>
                  </div>
                  <div id="feedback-banner" class="bg-app-cyan text-app-bg px-8 py-4 rounded-2xl shadow-[0_15px_40px_rgba(66,213,230,0.3)] flex items-center gap-4 transform transition-all animate-bounce">
                     <i data-lucide="zap" class="w-8 h-8 fill-current"></i>
