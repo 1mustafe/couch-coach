@@ -441,9 +441,9 @@
                     </div>
                 </div>
 
-                <div class="flex flex-col items-end w-48" style="display:none;">
+                <div class="flex flex-col items-end w-48">
                     <span class="text-slate-400 text-xs font-bold tracking-[0.4em] uppercase mb-2 text-right mr-1">Sets</span>
-                    <span class="font-display text-8xl font-light text-white leading-none text-right hud-text-shadow"><span id="hud-sets">1</span><span class="text-2xl text-slate-500 ml-2 font-bold uppercase">/ 4</span></span>
+                    <span class="font-display text-8xl font-light text-white leading-none text-right hud-text-shadow"><span id="hud-sets">1</span><span class="text-2xl text-slate-500 ml-2 font-bold uppercase">/ 2</span></span>
                 </div>
             </div>
             
@@ -1018,59 +1018,166 @@
 
             startTimer() {
                 clearInterval(this.timerInterval);
-                // Poll backend for real data instead of simulating
-                this.timerInterval = setInterval(async () => {
-                    if(!this.isPaused) {
-                        this.seconds++;
-                        // Update timer display
-                        const ex = this.workoutData.exercises[this.exIndex];
-                        if(ex.reps.includes('s')) {
-                            const target = parseInt(ex.reps.replace('s',''));
-                            const rem = Math.max(0, target - this.seconds);
-                            document.getElementById('hud-center-val').innerText = rem;
-                        }
-                    }
-                    // Poll backend for live rep count + feedback
-                    try {
-                        const r = await fetch('/api/session/state?code=phone');
-                        if (r.ok) {
-                            const d = await r.json();
-                            // Update rep count from pose tracking
-                            const ex = this.workoutData.exercises[this.exIndex];
-                            if(!ex.reps.includes('s') && d.reps !== undefined) {
-                                document.getElementById('hud-center-val').innerText = d.reps;
-                            }
-                            // Update form score
-                            if(d.formScore) {
-                                const scoreMap = {good:98, warning:78, bad:55};
-                                document.getElementById('hud-form').innerText = scoreMap[d.formScore] || '—';
-                                document.getElementById('hud-form-pct').innerText = d.formScore ? '%' : '';
-                            }
-                            // Show AI feedback from Bedrock
-                            if(d.lastAnalysis && d.lastAnalysis.feedback && d.lastAnalysis.feedback !== this._lastFeedback) {
-                                this._lastFeedback = d.lastAnalysis.feedback;
-                                const type = d.lastAnalysis.score === 'bad' ? 'error' : d.lastAnalysis.score === 'warning' ? 'warning' : 'info';
-                                this.showAIPill(d.lastAnalysis.feedback, type);
-                                // Speak via Polly
-                                if(!this._speaking) {
-                                    this._speaking = true;
-                                    try {
-                                        const audio = new Audio('/api/speech?text=' + encodeURIComponent(d.lastAnalysis.feedback));
-                                        audio.onended = () => { this._speaking = false; };
-                                        audio.onerror = () => { this._speaking = false; };
-                                        audio.play().catch(() => { this._speaking = false; });
-                                    } catch(e) { this._speaking = false; }
-                                }
-                            }
-                        }
-                    } catch(e) {}
+                this._demoRep = 0;
+                this._demoSet = 1;
+                this._demoScore = 0;
+                this._demoGoodReps = 0;
+                this._demoBadReps = 0;
+                this._speaking = false;
+                this._lastFeedback = '';
+
+                // Scripted demo sequence — press Space/Enter to advance each rep
+                // Set 1: 5 reps (rep1=bad shoulders, rep2=bad legs, rep3-5=good)
+                // Set 2: 5 reps (all good)
+                this._demoScript = [
+                    // Set 1
+                    { rep:1, set:1, score:55, type:'error', feedback:"Your shoulders are flaring out. Tuck your elbows closer to your body for better activation." },
+                    { rep:2, set:1, score:62, type:'warning', feedback:"Legs are too far apart. Bring your feet closer together, about hip width." },
+                    { rep:3, set:1, score:85, type:'info', feedback:"Good rep. Two more to go, keep that form tight." },
+                    { rep:4, set:1, score:90, type:'info', feedback:"Nice work, much better form. One more." },
+                    { rep:5, set:1, score:94, type:'info', feedback:"Great rep. Set one complete. Take a short rest." },
+                    // Set 2
+                    { rep:1, set:2, score:88, type:'info', feedback:"Set two. Good starting position, lets go." },
+                    { rep:2, set:2, score:91, type:'info', feedback:"Solid form, keep it up." },
+                    { rep:3, set:2, score:93, type:'info', feedback:"Three down, two to go. Looking strong." },
+                    { rep:4, set:2, score:95, type:'info', feedback:"Almost there, maintain that form." },
+                    { rep:5, set:2, score:98, type:'info', feedback:"Perfect finish. Workout complete, great session." },
+                ];
+
+                // Timer for elapsed time
+                this.timerInterval = setInterval(() => {
+                    if(!this.isPaused) this.seconds++;
                 }, 1000);
+
+                // Update sets display
+                document.getElementById('hud-center-sub').innerText = '';
+                this._updateDemoHUD();
+            },
+
+            _updateDemoHUD() {
+                const totalReps = this._demoRep;
+                document.getElementById('hud-center-val').innerText = this._demoRep;
+                document.getElementById('hud-center-label').innerText = 'REP COUNT';
+                document.getElementById('hud-sets').innerText = this._demoSet;
+                if (this._demoScore > 0) {
+                    document.getElementById('hud-form').innerText = this._demoScore;
+                    document.getElementById('hud-form-pct').innerText = '%';
+                }
+            },
+
+            advanceDemoRep() {
+                if (!this._demoScript || this._demoScript.length === 0) return;
+                const step = this._demoScript.shift();
+                this._demoRep = step.rep;
+                this._demoSet = step.set;
+                this._demoScore = step.score;
+                if (step.score >= 80) this._demoGoodReps++; else this._demoBadReps++;
+
+                this._updateDemoHUD();
+                this.showAIPill(step.feedback, step.type);
+
+                // Speak via Polly
+                if (!this._speaking) {
+                    this._speaking = true;
+                    try {
+                        const audio = new Audio('/api/speech?text=' + encodeURIComponent(step.feedback));
+                        audio.onended = () => { this._speaking = false; };
+                        audio.onerror = () => { this._speaking = false; };
+                        audio.play().catch(() => { this._speaking = false; });
+                    } catch(e) { this._speaking = false; }
+                }
             },
 
             triggerSimulatedAI() {
-                // No longer simulated — real feedback comes from backend polling in startTimer
+                // Demo mode — keyboard driven
                 this._lastFeedback = '';
                 this._speaking = false;
+
+                // Listen for Space key to advance reps
+                if (!this._demoKeyListener) {
+                    this._demoKeyListener = (e) => {
+                        if (e.code === 'Space' && document.getElementById('workout-view') && 
+                            document.getElementById('workout-view').classList.contains('view-active')) {
+                            e.preventDefault();
+                            this.advanceDemoRep();
+                        }
+                    };
+                    document.addEventListener('keydown', this._demoKeyListener);
+                }
+
+                // Voice input — "Coach" wake word
+                this._startCoachListener();
+            },
+
+            _startCoachListener() {
+                const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!SR) return;
+                this._recognition = new SR();
+                this._recognition.continuous = true;
+                this._recognition.interimResults = false;
+                this._recognition.lang = 'en-US';
+
+                this._recognition.onresult = (e) => {
+                    const last = e.results[e.results.length - 1];
+                    if (!last.isFinal) return;
+                    const transcript = last[0].transcript.trim().toLowerCase();
+                    if (transcript.includes('coach')) {
+                        const question = transcript.split('coach').slice(1).join('coach').trim();
+                        if (question.length > 2) {
+                            this._handleCoachQuestion(question);
+                        } else {
+                            this._speakAndShow("I'm here. What do you need?", 'info');
+                        }
+                    }
+                };
+
+                this._recognition.onend = () => {
+                    if (!this._speaking) {
+                        setTimeout(() => { try { this._recognition.start(); } catch(e) {} }, 300);
+                    }
+                };
+                this._recognition.onerror = (e) => {
+                    if (e.error !== 'not-allowed') {
+                        setTimeout(() => { try { this._recognition.start(); } catch(e) {} }, 1000);
+                    }
+                };
+                try { this._recognition.start(); } catch(e) {}
+            },
+
+            async _handleCoachQuestion(question) {
+                // Generate summary based on demo performance
+                const good = this._demoGoodReps || 0;
+                const bad = this._demoBadReps || 0;
+                const total = good + bad;
+                const pct = total > 0 ? Math.round(good / total * 100) : 0;
+
+                let summary;
+                if (question.includes('form') || question.includes('how')) {
+                    summary = `You completed ${total} reps across 2 sets. ${good} had good form and ${bad} needed correction. Your form score finished at ${this._demoScore}%. `;
+                    if (pct >= 80) summary += "Overall a strong session. Your form improved as you went, which is exactly what we want to see.";
+                    else summary += "Focus on keeping your elbows tucked and feet at hip width next time.";
+                } else {
+                    summary = "Great workout today. You showed real improvement from set one to set two. Keep it up.";
+                }
+
+                this._speakAndShow(summary, 'info');
+            },
+
+            _speakAndShow(text, type) {
+                this.showAIPill(text, type);
+                if (!this._speaking) {
+                    this._speaking = true;
+                    try {
+                        const audio = new Audio('/api/speech?text=' + encodeURIComponent(text));
+                        audio.onended = () => {
+                            this._speaking = false;
+                            // Resume listening
+                            setTimeout(() => { try { this._recognition.start(); } catch(e) {} }, 300);
+                        };
+                        audio.onerror = () => { this._speaking = false; };
+                        audio.play().catch(() => { this._speaking = false; });
+                    } catch(e) { this._speaking = false; }
+                }
             },
 
             showAIPill(text, type) {
