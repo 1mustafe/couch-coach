@@ -6,150 +6,149 @@
 <title>CouchCoach</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.3/dist/pose-detection.min.js"></script>
-<script>
-    tailwind.config = {
-        theme: {
-            extend: {
-                colors: {
-                    'app-bg': '#0a0e14',
-                    'app-surface': '#141a22',
-                    'app-surfaceLight': '#1c2530',
-                    'app-border': '#1e2a36',
-                    'app-cyan': '#42d5e6',
-                },
-                fontFamily: {
-                    sans: ['Inter', 'sans-serif'],
-                    display: ['Montserrat', 'sans-serif'],
-                }
-            }
-        }
-    }
-</script>
 <style>
-    * { -webkit-tap-highlight-color: transparent; }
-    body { overscroll-behavior: none; }
-    .view-active { display: flex !important; }
-    .view-hidden { display: none !important; }
-    #poseCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-    #cam { transform: scaleX(-1); }
-    #captureCanvas { display: none; }
-    @keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 1; } 100% { transform: scale(1.4); opacity: 0; } }
-    .pulse-ring { animation: pulse-ring 1.5s ease-out infinite; }
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#09090b;--sf:#111113;--bd:#1c1c1e;
+  --tx:#e4e4e7;--dm:#52525b;
+  --g:#4ade80;--y:#facc15;--r:#f87171;
+  --mn:'SF Mono','Fira Code','Consolas',monospace;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:var(--bg);color:var(--tx);height:100dvh;overflow:hidden}
+.s{display:none;flex-direction:column;height:100dvh}.s.on{display:flex}
+
+/* PAIR */
+.pair{align-items:center;justify-content:center;padding:32px 24px;gap:28px;text-align:center}
+.p-logo{font-family:var(--mn);font-size:15px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:var(--g)}
+.p-title{font-size:20px;font-weight:600}
+.p-sub{color:var(--dm);font-size:13px;line-height:1.5;max-width:260px}
+.code-row{display:flex;gap:8px}
+.ci{width:44px;height:54px;text-align:center;background:var(--sf);border:1px solid var(--bd);
+  border-radius:10px;color:var(--tx);font-family:var(--mn);font-size:22px;font-weight:700;
+  outline:none;transition:border-color .2s;-webkit-appearance:none}
+.ci:focus{border-color:var(--g)}
+.p-err{color:var(--r);font-size:12px;min-height:16px}
+.p-btn{width:100%;max-width:300px;padding:15px;background:var(--g);color:#09090b;border:none;
+  border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;letter-spacing:.5px;transition:all .2s}
+.p-btn:disabled{opacity:.25;cursor:not-allowed}
+.p-btn:active:not(:disabled){transform:scale(.97)}
+
+/* WORKOUT */
+.wk-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px}
+.wk-logo{font-family:var(--mn);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--g)}
+.wk-status{font-family:var(--mn);font-size:10px;color:var(--dm)}
+
+.cam-wrap{flex:1;position:relative;overflow:hidden;border-radius:14px;margin:0 10px}
+#cam{width:100%;height:100%;object-fit:cover;border-radius:14px;transform:scaleX(-1)}
+#poseCanvas{position:absolute;top:0;left:0;width:100%;height:100%;border-radius:14px;pointer-events:none}
+#captureCanvas{display:none}
+
+/* Silhouette overlay */
+.silhouette-overlay{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;
+  display:flex;align-items:center;justify-content:center;border-radius:14px}
+.sil-msg{position:absolute;bottom:20px;left:16px;right:16px;text-align:center;
+  background:rgba(9,9,11,.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid var(--bd);border-radius:10px;padding:12px;font-size:13px;font-weight:500}
+.sil-msg.ready{color:var(--g);border-color:var(--g)}
+
+/* Feedback toast */
+.toast{position:absolute;top:16px;left:14px;right:14px;
+  background:rgba(9,9,11,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border:1px solid var(--bd);border-radius:12px;padding:12px 14px;
+  transform:translateY(-130%);transition:transform .4s cubic-bezier(.16,1,.3,1);z-index:5}
+.toast.vis{transform:translateY(0)}
+.toast-t{font-size:13px;line-height:1.3;font-weight:500}
+.toast-m{font-family:var(--mn);font-size:10px;color:var(--dm);margin-top:4px}
+
+/* Angle display */
+.angle-badge{position:absolute;bottom:60px;left:14px;
+  background:rgba(9,9,11,.8);border:1px solid var(--bd);border-radius:8px;
+  padding:6px 10px;font-family:var(--mn);font-size:11px;color:var(--dm)}
+
+.ctrl{padding:12px 16px 20px;display:flex;flex-direction:column;gap:10px}
+.stats{display:flex;justify-content:space-around;padding-bottom:4px}
+.st{text-align:center}
+.st-v{font-family:var(--mn);font-size:22px;font-weight:700}
+.st-l{font-size:9px;color:var(--dm);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+.ex-row{display:flex;gap:6px}
+.ex{flex:1;padding:9px;background:var(--sf);border:1px solid var(--bd);border-radius:9px;
+  color:var(--dm);font-family:var(--mn);font-size:11px;text-align:center;cursor:pointer;transition:all .2s}
+.ex.sel{color:var(--g);border-color:var(--g);background:rgba(74,222,128,.06)}
+.act{width:100%;padding:15px;border:none;border-radius:12px;font-size:15px;font-weight:600;
+  cursor:pointer;transition:all .2s;letter-spacing:.5px}
+.act.go{background:var(--g);color:#09090b}
+.act.stop{background:var(--r);color:#fff}
+.act:active{transform:scale(.97)}
+
+/* Loading */
+.loader{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(9,9,11,.9);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  border-radius:14px;z-index:10}
+.loader-spin{width:28px;height:28px;border:3px solid var(--bd);border-top-color:var(--g);
+  border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.loader-txt{font-size:13px;color:var(--dm)}
 </style>
 </head>
-<body class="bg-app-bg font-sans text-white h-[100dvh] overflow-hidden">
+<body>
 
-<!-- ══════ PAIR SCREEN ══════ -->
-<div id="pairScreen" class="view-active flex-col h-[100dvh] items-center justify-center px-8 text-center gap-8">
-    <!-- Logo -->
-    <div class="flex flex-col items-center">
-        <span class="font-display font-black text-2xl tracking-tighter flex flex-col items-center leading-[0.9]">
-            <span>Couch</span>
-            <span class="text-app-cyan">Coach</span>
-        </span>
-    </div>
-
-    <div class="flex flex-col items-center gap-3 mt-4">
-        <h1 class="font-display text-2xl font-bold">Connect to your TV</h1>
-        <p class="text-slate-400 text-sm max-w-[260px] leading-relaxed">Enter the 6-digit code shown on your Fire TV dashboard</p>
-    </div>
-
-    <!-- Code Inputs -->
-    <div class="flex gap-2" id="codeRow">
-        <input class="w-11 h-14 text-center bg-app-surface border border-app-border rounded-xl text-white font-display text-xl font-bold outline-none focus:border-app-cyan transition-colors" type="tel" maxlength="1" inputmode="numeric" autocomplete="off">
-        <input class="w-11 h-14 text-center bg-app-surface border border-app-border rounded-xl text-white font-display text-xl font-bold outline-none focus:border-app-cyan transition-colors" type="tel" maxlength="1" inputmode="numeric" autocomplete="off">
-        <input class="w-11 h-14 text-center bg-app-surface border border-app-border rounded-xl text-white font-display text-xl font-bold outline-none focus:border-app-cyan transition-colors" type="tel" maxlength="1" inputmode="numeric" autocomplete="off">
-        <div class="w-3"></div>
-        <input class="w-11 h-14 text-center bg-app-surface border border-app-border rounded-xl text-white font-display text-xl font-bold outline-none focus:border-app-cyan transition-colors" type="tel" maxlength="1" inputmode="numeric" autocomplete="off">
-        <input class="w-11 h-14 text-center bg-app-surface border border-app-border rounded-xl text-white font-display text-xl font-bold outline-none focus:border-app-cyan transition-colors" type="tel" maxlength="1" inputmode="numeric" autocomplete="off">
-        <input class="w-11 h-14 text-center bg-app-surface border border-app-border rounded-xl text-white font-display text-xl font-bold outline-none focus:border-app-cyan transition-colors" type="tel" maxlength="1" inputmode="numeric" autocomplete="off">
-    </div>
-
-    <p id="pErr" class="text-red-400 text-xs min-h-[16px]"></p>
-
-    <button id="pBtn" disabled onclick="doPair()" class="w-full max-w-[300px] py-4 bg-app-cyan text-app-bg font-bold text-base rounded-full disabled:opacity-25 active:scale-[0.97] transition-all font-display tracking-wide">
-        Connect
-    </button>
+<!-- PAIR -->
+<div id="pairS" class="s pair on">
+  <div class="p-logo">CouchCoach</div>
+  <div class="p-title">Connect to your TV</div>
+  <div class="p-sub">Enter the 6-digit code shown on your Fire TV</div>
+  <div class="code-row" id="codeRow">
+    <input class="ci" type="tel" maxlength="1" inputmode="numeric" autocomplete="off">
+    <input class="ci" type="tel" maxlength="1" inputmode="numeric" autocomplete="off">
+    <input class="ci" type="tel" maxlength="1" inputmode="numeric" autocomplete="off">
+    <input class="ci" type="tel" maxlength="1" inputmode="numeric" autocomplete="off">
+    <input class="ci" type="tel" maxlength="1" inputmode="numeric" autocomplete="off">
+    <input class="ci" type="tel" maxlength="1" inputmode="numeric" autocomplete="off">
+  </div>
+  <div class="p-err" id="pErr"></div>
+  <button class="p-btn" id="pBtn" disabled onclick="doPair()">Connect</button>
 </div>
 
-<!-- ══════ WORKOUT SCREEN ══════ -->
-<div id="wkScreen" class="view-hidden flex-col h-[100dvh]">
-    <!-- Header -->
-    <div class="flex items-center justify-between px-5 py-3 shrink-0">
-        <span class="font-display font-black text-sm tracking-tighter flex items-center gap-1">
-            <span>Couch</span><span class="text-app-cyan">Coach</span>
-        </span>
-        <div class="flex items-center gap-2">
-            <div class="w-2 h-2 rounded-full bg-app-cyan shadow-[0_0_6px_#42d5e6] animate-pulse"></div>
-            <span id="wkStatus" class="text-slate-400 text-[10px] font-semibold tracking-wider uppercase">Loading...</span>
-        </div>
+<!-- WORKOUT -->
+<div id="wkS" class="s">
+  <div class="wk-head">
+    <div class="wk-logo">CouchCoach</div>
+    <div class="wk-status" id="wkStatus">Loading pose model…</div>
+  </div>
+  <div class="cam-wrap">
+    <video id="cam" autoplay playsinline muted></video>
+    <canvas id="poseCanvas"></canvas>
+    <canvas id="captureCanvas"></canvas>
+    <div class="silhouette-overlay" id="silOverlay">
+      <div class="sil-msg" id="silMsg">Position yourself in frame</div>
     </div>
-
-    <!-- Camera -->
-    <div class="flex-1 relative overflow-hidden rounded-2xl mx-3">
-        <video id="cam" class="w-full h-full object-cover rounded-2xl" autoplay playsinline muted></video>
-        <canvas id="poseCanvas"></canvas>
-        <canvas id="captureCanvas"></canvas>
-
-        <!-- Silhouette Overlay -->
-        <div id="silOverlay" class="absolute inset-0 flex items-end justify-center pb-6 pointer-events-none rounded-2xl">
-            <div id="silMsg" class="bg-app-bg/85 backdrop-blur-xl border border-app-border rounded-xl px-5 py-3 text-sm font-medium text-slate-300 text-center max-w-[90%]">
-                Position yourself in frame
-            </div>
-        </div>
-
-        <!-- Feedback Toast -->
-        <div id="toast" class="absolute top-4 left-3 right-3 bg-app-bg/90 backdrop-blur-xl border border-app-border rounded-2xl px-4 py-3 translate-y-[-130%] transition-transform duration-400 z-10" style="transition-timing-function: cubic-bezier(0.16,1,0.3,1)">
-            <p id="toastT" class="text-sm font-semibold leading-snug"></p>
-            <p id="toastM" class="text-[10px] text-slate-500 font-mono mt-1"></p>
-        </div>
-
-        <!-- Angle Badge -->
-        <div id="angleBadge" class="absolute bottom-16 left-3 bg-app-bg/80 border border-app-border rounded-lg px-3 py-1.5 font-mono text-[11px] text-slate-400 hidden"></div>
-
-        <!-- Loader -->
-        <div id="loader" class="absolute inset-0 bg-app-bg/90 flex flex-col items-center justify-center gap-4 rounded-2xl z-20">
-            <div class="w-7 h-7 border-3 border-app-border border-t-app-cyan rounded-full animate-spin"></div>
-            <span class="text-slate-400 text-sm">Loading pose detection...</span>
-        </div>
+    <div class="toast" id="toast">
+      <div class="toast-t" id="toastT"></div>
+      <div class="toast-m" id="toastM"></div>
     </div>
-
-    <!-- Controls -->
-    <div class="px-5 py-4 flex flex-col gap-3 shrink-0">
-        <!-- Stats -->
-        <div class="flex justify-around py-2">
-            <div class="text-center">
-                <div id="reps" class="font-display text-2xl font-black">0</div>
-                <div class="text-[9px] text-slate-500 font-bold tracking-widest uppercase mt-0.5">Reps</div>
-            </div>
-            <div class="text-center">
-                <div id="score" class="font-display text-2xl font-black">—</div>
-                <div class="text-[9px] text-slate-500 font-bold tracking-widest uppercase mt-0.5">Form</div>
-            </div>
-            <div class="text-center">
-                <div id="timer" class="font-display text-2xl font-black">0:00</div>
-                <div class="text-[9px] text-slate-500 font-bold tracking-widest uppercase mt-0.5">Time</div>
-            </div>
-        </div>
-
-        <!-- Exercise Selector -->
-        <div class="flex gap-2">
-            <button onclick="pickEx(this)" data-e="pushup" class="ex-btn flex-1 py-2.5 bg-app-cyan/10 border border-app-cyan/30 rounded-xl text-app-cyan font-mono text-[11px] font-bold text-center">Pushup</button>
-            <button onclick="pickEx(this)" data-e="squat" class="ex-btn flex-1 py-2.5 bg-app-surface border border-app-border rounded-xl text-slate-500 font-mono text-[11px] font-bold text-center">Squat</button>
-            <button onclick="pickEx(this)" data-e="plank" class="ex-btn flex-1 py-2.5 bg-app-surface border border-app-border rounded-xl text-slate-500 font-mono text-[11px] font-bold text-center">Plank</button>
-            <button onclick="pickEx(this)" data-e="lunge" class="ex-btn flex-1 py-2.5 bg-app-surface border border-app-border rounded-xl text-slate-500 font-mono text-[11px] font-bold text-center">Lunge</button>
-        </div>
-
-        <!-- Action Button -->
-        <button id="actBtn" onclick="toggle()" class="w-full py-4 bg-app-cyan text-app-bg font-bold text-base rounded-full active:scale-[0.97] transition-all font-display tracking-wide">
-            Start Workout
-        </button>
+    <div class="angle-badge" id="angleBadge" style="display:none"></div>
+    <div class="loader" id="loader">
+      <div class="loader-spin"></div>
+      <div class="loader-txt">Loading pose detection…</div>
     </div>
+  </div>
+  <div class="ctrl">
+    <div class="stats">
+      <div class="st"><div class="st-v" id="reps">0</div><div class="st-l">Reps</div></div>
+      <div class="st"><div class="st-v" id="score">—</div><div class="st-l">Form</div></div>
+      <div class="st"><div class="st-v" id="timer">0:00</div><div class="st-l">Time</div></div>
+    </div>
+    <div class="ex-row">
+      <div class="ex sel" onclick="pickEx(this)" data-e="pushup">Pushup</div>
+      <div class="ex" onclick="pickEx(this)" data-e="squat">Squat</div>
+      <div class="ex" onclick="pickEx(this)" data-e="plank">Plank</div>
+      <div class="ex" onclick="pickEx(this)" data-e="lunge">Lunge</div>
+    </div>
+    <button class="act go" id="actBtn" onclick="toggle()">Start Workout</button>
+  </div>
 </div>
 
 <script>
@@ -279,7 +278,7 @@ const EX_CONFIG = {
 // ══════════════════════════════════════
 // PAIRING
 // ══════════════════════════════════════
-const cis = document.querySelectorAll('#codeRow input');
+const cis = document.querySelectorAll('.ci');
 cis.forEach((inp, i) => {
     inp.addEventListener('input', () => {
         inp.value = inp.value.replace(/\D/g, '');
@@ -310,13 +309,7 @@ async function doPair() {
         const d = await r.json();
         if (!r.ok) { err.textContent = 'Invalid code. Check your TV and try again.'; return; }
         sid = d.sessionId;
-        // Show connected state
-        const btn = document.getElementById('pBtn');
-        btn.textContent = '✓ Connected';
-        btn.classList.remove('bg-app-cyan', 'text-app-bg');
-        btn.classList.add('bg-green-500/20', 'text-green-400', 'border', 'border-green-500/30');
-        err.innerHTML = '<span class="text-green-400">Linked to your Fire TV</span>';
-        setTimeout(goWorkout, 1200);
+        goWorkout();
     } catch (e) { err.textContent = 'Cannot reach server. Same WiFi as your TV?'; }
 }
 
