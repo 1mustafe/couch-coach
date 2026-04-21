@@ -1124,7 +1124,14 @@
                     if (transcript.includes('coach')) {
                         const question = transcript.split('coach').slice(1).join('coach').trim();
                         if (question.length > 2) {
-                            this._handleCoachQuestion(question);
+                            // Check for "start workout" command
+                            if (question.includes('start') && (question.includes('workout') || question.includes('work out'))) {
+                                this._speakAndShow("Starting workout. Get in position.", 'info');
+                                // Show toast notification
+                                UI.showToast("Starting Workout...", "play");
+                            } else {
+                                this._handleCoachQuestion(question);
+                            }
                         } else {
                             this._speakAndShow("I'm here. What do you need?", 'info');
                         }
