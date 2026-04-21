@@ -201,6 +201,10 @@ const server = http.createServer(async (req, res) => {
     // POST /api/session/rep — phone sends rep count update
     if (p === '/api/session/rep' && req.method === 'POST') {
         const body = await parseBody(req);
+        // Auto-create session if phone sends with sessionId 'phone'
+        if (body.sessionId === 'phone' && ![...sessions.values()].find(x => x.id === 'phone')) {
+            sessions.set('phone', { id: 'phone', code: 'phone', paired: true, active: true, exercise: body.exercise || 'pushup', reps: 0, formScore: null, feedback: [], lastAnalysis: null, elapsedStart: Date.now() });
+        }
         const s = [...sessions.values()].find(x => x.id === body.sessionId);
         if (!s) return json(res, 404, { error: 'Not found' });
         s.reps = body.reps || s.reps;
@@ -218,6 +222,10 @@ const server = http.createServer(async (req, res) => {
     // POST /api/session/analyze — phone sends keypoint data for AI analysis
     if (p === '/api/session/analyze' && req.method === 'POST') {
         const body = await parseBody(req);
+        // Auto-create session if needed
+        if (body.sessionId === 'phone' && ![...sessions.values()].find(x => x.id === 'phone')) {
+            sessions.set('phone', { id: 'phone', code: 'phone', paired: true, active: true, exercise: 'pushup', reps: 0, formScore: null, feedback: [], lastAnalysis: null, elapsedStart: Date.now() });
+        }
         const s = [...sessions.values()].find(x => x.id === body.sessionId);
         if (!s) return json(res, 404, { error: 'Not found' });
 

@@ -1018,41 +1018,58 @@
 
             startTimer() {
                 clearInterval(this.timerInterval);
-                this.timerInterval = setInterval(() => {
+                // Poll backend for real data instead of simulating
+                this.timerInterval = setInterval(async () => {
                     if(!this.isPaused) {
                         this.seconds++;
-                        // If it's a rep exercise, simulate rep counting based on time
+                        // Update timer display
                         const ex = this.workoutData.exercises[this.exIndex];
-                        if(!ex.reps.includes('s')) {
-                            const target = parseInt(ex.reps.split('-').pop());
-                            const currentRep = Math.floor(this.seconds / 3); // 1 rep every 3 seconds
-                            if(currentRep <= target) {
-                                document.getElementById('hud-center-val').innerText = currentRep;
-                            }
-                        } else {
-                            // If it's a time exercise, countdown
+                        if(ex.reps.includes('s')) {
                             const target = parseInt(ex.reps.replace('s',''));
                             const rem = Math.max(0, target - this.seconds);
                             document.getElementById('hud-center-val').innerText = rem;
                         }
                     }
+                    // Poll backend for live rep count + feedback
+                    try {
+                        const r = await fetch('/api/session/state?code=phone');
+                        if (r.ok) {
+                            const d = await r.json();
+                            // Update rep count from pose tracking
+                            const ex = this.workoutData.exercises[this.exIndex];
+                            if(!ex.reps.includes('s') && d.reps !== undefined) {
+                                document.getElementById('hud-center-val').innerText = d.reps;
+                            }
+                            // Update form score
+                            if(d.formScore) {
+                                const scoreMap = {good:98, warning:78, bad:55};
+                                document.getElementById('hud-form').innerText = scoreMap[d.formScore] || 94;
+                            }
+                            // Show AI feedback from Bedrock
+                            if(d.lastAnalysis && d.lastAnalysis.feedback && d.lastAnalysis.feedback !== this._lastFeedback) {
+                                this._lastFeedback = d.lastAnalysis.feedback;
+                                const type = d.lastAnalysis.score === 'bad' ? 'error' : d.lastAnalysis.score === 'warning' ? 'warning' : 'info';
+                                this.showAIPill(d.lastAnalysis.feedback, type);
+                                // Speak via Polly
+                                if(!this._speaking) {
+                                    this._speaking = true;
+                                    try {
+                                        const audio = new Audio('/api/speech?text=' + encodeURIComponent(d.lastAnalysis.feedback));
+                                        audio.onended = () => { this._speaking = false; };
+                                        audio.onerror = () => { this._speaking = false; };
+                                        audio.play().catch(() => { this._speaking = false; });
+                                    } catch(e) { this._speaking = false; }
+                                }
+                            }
+                        }
+                    } catch(e) {}
                 }, 1000);
             },
 
             triggerSimulatedAI() {
-                clearInterval(this.feedbackInterval);
-                const events = [
-                    { t: 2, m: "Ready to begin?", type: "info" },
-                    { t: 8, m: "Great pace, keep it up!", type: "info" },
-                    { t: 15, m: "Slow down your descent", type: "warning" },
-                    { t: 22, m: "Perfect form detected", type: "info" },
-                ];
-                
-                this.feedbackInterval = setInterval(() => {
-                    if(this.isPaused) return;
-                    const event = events.find(e => e.t === this.seconds);
-                    if(event) this.showAIPill(event.m, event.type);
-                }, 1000);
+                // No longer simulated — real feedback comes from backend polling in startTimer
+                this._lastFeedback = '';
+                this._speaking = false;
             },
 
             showAIPill(text, type) {
