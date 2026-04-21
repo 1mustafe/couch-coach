@@ -145,6 +145,9 @@ const server = http.createServer(async (req, res) => {
     if (p === '/phone' || p === '/phone/') {
         return serveFile(res, path.join(__dirname, '..', 'phone-app', 'index.html'), 'text/html');
     }
+    if (p === '/workouts.json') {
+        return serveFile(res, path.join(__dirname, '..', 'workouts.json'), 'application/json');
+    }
 
     // ── API ──
 

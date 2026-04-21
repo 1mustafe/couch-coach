@@ -1,0 +1,452 @@
+[
+  {
+    "id": "demo",
+    "title": "Explosive Power & Kinetic Form",
+    "level": "Advanced",
+    "type": "Power & Output",
+    "time": 45,
+    "kcal": 520,
+    "img": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1920&auto=format&fit=crop",
+    "description": "Master your stabilization and maximize output. Focus today: form consistency at high volume. Perfect for clearing your weekly goals.",
+    "exercises": [
+      { "name": "Dumbbell Bench Press", "sets": 4, "reps": "10-12", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" },
+      { "name": "Goblet Squats", "sets": 4, "reps": "12-15", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" },
+      { "name": "Plank Holds", "sets": 3, "reps": "60s", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" }
+    ]
+  },
+  {
+    "id": "002",
+    "title": "Plyometric Powerhouse",
+    "level": "Advanced",
+    "type": "Power & Output",
+    "time": 40,
+    "kcal": 480,
+    "img": "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=800&auto=format&fit=crop",
+    "description": "Utilize rapid, explosive movements to enhance muscle reactivity and fast-twitch fiber activation.",
+    "exercises": [
+      { "name": "Depth Jumps", "sets": 4, "reps": "8", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" },
+      { "name": "Medicine Ball Slams", "sets": 4, "reps": "15", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" },
+      { "name": "Clapping Push-ups", "sets": 3, "reps": "10", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" }
+    ]
+  },
+  {
+    "id": "003",
+    "title": "Kettlebell Kinetics",
+    "level": "Intermediate",
+    "type": "Power & Output",
+    "time": 35,
+    "kcal": 410,
+    "img": "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=800&auto=format&fit=crop",
+    "description": "Fluid, momentum-based lifting to bridge the gap between strength and cardiovascular conditioning.",
+    "exercises": [
+      { "name": "Kettlebell Swings", "sets": 4, "reps": "20", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" },
+      { "name": "Goblet Cleans", "sets": 3, "reps": "12", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" },
+      { "name": "Turkish Get-Ups", "sets": 3, "reps": "5", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" }
+    ]
+  },
+  {
+    "id": "004",
+    "title": "Dynamic Force Generation",
+    "level": "Advanced",
+    "type": "Power & Output",
+    "time": 50,
+    "kcal": 550,
+    "img": "https://images.unsplash.com/photo-1434682881908-b43d0467b798?q=80&w=800&auto=format&fit=crop",
+    "description": "Focus on rate of force development. Move moderate weights as quickly and aggressively as possible.",
+    "exercises": [
+      { "name": "Push Presses", "sets": 5, "reps": "5", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" },
+      { "name": "Broad Jumps", "sets": 4, "reps": "6", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" },
+      { "name": "Dumbbell Snatches", "sets": 4, "reps": "8", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" }
+    ]
+  },
+  {
+    "id": "005",
+    "title": "Speed & Strength Base",
+    "level": "Beginner",
+    "type": "Power & Output",
+    "time": 30,
+    "kcal": 300,
+    "img": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=800&auto=format&fit=crop",
+    "description": "An introduction to power training. Learn how to recruit motor units quickly while maintaining safety.",
+    "exercises": [
+      { "name": "Speed Squats", "sets": 3, "reps": "10", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" },
+      { "name": "Banded Pull-aparts", "sets": 3, "reps": "15", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" },
+      { "name": "Step-ups", "sets": 3, "reps": "12", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" }
+    ]
+  },
+  {
+    "id": "006",
+    "title": "Olympic Primer",
+    "level": "Intermediate",
+    "type": "Power & Output",
+    "time": 45,
+    "kcal": 450,
+    "img": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800&auto=format&fit=crop",
+    "description": "Break down the mechanics of heavy lifting. Focus on triple extension and landing mechanics.",
+    "exercises": [
+      { "name": "Hang Cleans", "sets": 5, "reps": "5", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" },
+      { "name": "Front Squats", "sets": 4, "reps": "8", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" },
+      { "name": "Farmers Carry", "sets": 3, "reps": "45s", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" }
+    ]
+  },
+  {
+    "id": "101",
+    "title": "Upper Body Hypertrophy",
+    "level": "Advanced",
+    "type": "Upper Body",
+    "time": 45,
+    "kcal": 380,
+    "img": "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=800&auto=format&fit=crop",
+    "description": "A high-volume upper body session designed to maximize muscle growth. Focus on slow, controlled eccentric movements.",
+    "exercises": [
+      { "name": "Incline Dumbbell Press", "sets": 4, "reps": "8-10", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" },
+      { "name": "Bent Over Rows", "sets": 4, "reps": "10-12", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" },
+      { "name": "Lateral Raises", "sets": 3, "reps": "15", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" }
+    ]
+  },
+  {
+    "id": "102",
+    "title": "Chest & Triceps Push",
+    "level": "Intermediate",
+    "type": "Upper Body",
+    "time": 35,
+    "kcal": 310,
+    "img": "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=800&auto=format&fit=crop",
+    "description": "Strictly pushing mechanics. This workout targets your pecs, front delts, and triceps for a complete upper-anterior burn.",
+    "exercises": [
+      { "name": "Push-ups", "sets": 3, "reps": "15-20", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" },
+      { "name": "Overhead Tricep Extension", "sets": 3, "reps": "12", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" },
+      { "name": "Chest Flyes", "sets": 3, "reps": "12-15", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" }
+    ]
+  },
+  {
+    "id": "103",
+    "title": "Back & Biceps Pull",
+    "level": "Beginner",
+    "type": "Upper Body",
+    "time": 30,
+    "kcal": 280,
+    "img": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800&auto=format&fit=crop",
+    "description": "Build a strong, wide back and peaked biceps. Essential for posture correction and everyday pulling strength.",
+    "exercises": [
+      { "name": "Dumbbell Pullovers", "sets": 3, "reps": "10", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" },
+      { "name": "Alternating Bicep Curls", "sets": 4, "reps": "12", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" },
+      { "name": "Renegade Rows", "sets": 3, "reps": "8-10", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" }
+    ]
+  },
+  {
+    "id": "104",
+    "title": "Shoulder Shred",
+    "level": "Intermediate",
+    "type": "Upper Body",
+    "time": 35,
+    "kcal": 300,
+    "img": "https://images.unsplash.com/photo-1434682881908-b43d0467b798?q=80&w=800&auto=format&fit=crop",
+    "description": "Isolate the deltoids to build bolder shoulders. Expect high time-under-tension and an intense pump.",
+    "exercises": [
+      { "name": "Seated Arnold Press", "sets": 4, "reps": "10-12", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" },
+      { "name": "Front Raises", "sets": 3, "reps": "15", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" },
+      { "name": "Face Pulls", "sets": 4, "reps": "15", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" }
+    ]
+  },
+  {
+    "id": "105",
+    "title": "Arm Arsenal",
+    "level": "Beginner",
+    "type": "Upper Body",
+    "time": 25,
+    "kcal": 220,
+    "img": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=800&auto=format&fit=crop",
+    "description": "A quick, targeted session focusing exclusively on the biceps and triceps. Perfect as a finisher.",
+    "exercises": [
+      { "name": "Hammer Curls", "sets": 3, "reps": "12", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" },
+      { "name": "Tricep Dips", "sets": 3, "reps": "10-15", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" },
+      { "name": "Concentration Curls", "sets": 3, "reps": "10", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" }
+    ]
+  },
+  {
+    "id": "106",
+    "title": "Complete Upper Strength",
+    "level": "Advanced",
+    "type": "Upper Body",
+    "time": 55,
+    "kcal": 450,
+    "img": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800&auto=format&fit=crop",
+    "description": "Heavy compound movements covering the entire upper body. Designed to build raw strength and density.",
+    "exercises": [
+      { "name": "Weighted Pull-ups", "sets": 4, "reps": "6-8", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" },
+      { "name": "Barbell Overhead Press", "sets": 4, "reps": "5-8", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" },
+      { "name": "Pendlay Rows", "sets": 4, "reps": "8", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" }
+    ]
+  },
+  {
+    "id": "201",
+    "title": "Lower Body Power",
+    "level": "Advanced",
+    "type": "Lower Body",
+    "time": 50,
+    "kcal": 420,
+    "img": "https://images.unsplash.com/photo-1434682881908-b43d0467b798?q=80&w=800&auto=format&fit=crop",
+    "description": "Heavy, explosive lower body movements to increase vertical leap, sprint speed, and overall leg power.",
+    "exercises": [
+      { "name": "Barbell Squats", "sets": 5, "reps": "5", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" },
+      { "name": "Box Jumps", "sets": 4, "reps": "8", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" },
+      { "name": "Walking Lunges", "sets": 3, "reps": "20", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" }
+    ]
+  },
+  {
+    "id": "202",
+    "title": "Glute & Hamstring Focus",
+    "level": "Intermediate",
+    "type": "Lower Body",
+    "time": 40,
+    "kcal": 360,
+    "img": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=800&auto=format&fit=crop",
+    "description": "Target the posterior chain to build strong glutes and resilient hamstrings. Great for injury prevention.",
+    "exercises": [
+      { "name": "Romanian Deadlifts", "sets": 4, "reps": "10-12", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" },
+      { "name": "Glute Bridges", "sets": 3, "reps": "15", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" },
+      { "name": "Hamstring Curls", "sets": 3, "reps": "12", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" }
+    ]
+  },
+  {
+    "id": "203",
+    "title": "Quad Dominator",
+    "level": "Advanced",
+    "type": "Lower Body",
+    "time": 45,
+    "kcal": 400,
+    "img": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1920&auto=format&fit=crop",
+    "description": "An intense anterior chain focus to carve out deep quad separation and build massive leg volume.",
+    "exercises": [
+      { "name": "Bulgarian Split Squats", "sets": 4, "reps": "10", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" },
+      { "name": "Leg Extensions", "sets": 4, "reps": "15", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" },
+      { "name": "Sissy Squats", "sets": 3, "reps": "12", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" }
+    ]
+  },
+  {
+    "id": "204",
+    "title": "Beginner Squat School",
+    "level": "Beginner",
+    "type": "Lower Body",
+    "time": 30,
+    "kcal": 250,
+    "img": "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=800&auto=format&fit=crop",
+    "description": "Master the fundamental movement patterns of the lower body. Perfect for building mobility and baseline strength.",
+    "exercises": [
+      { "name": "Bodyweight Squats", "sets": 3, "reps": "15", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" },
+      { "name": "Static Lunges", "sets": 3, "reps": "10", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" },
+      { "name": "Calf Raises", "sets": 3, "reps": "20", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" }
+    ]
+  },
+  {
+    "id": "205",
+    "title": "Functional Lower Base",
+    "level": "Intermediate",
+    "type": "Lower Body",
+    "time": 40,
+    "kcal": 350,
+    "img": "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=800&auto=format&fit=crop",
+    "description": "Multi-planar movements to ensure your lower body strength translates effectively to real-world activities.",
+    "exercises": [
+      { "name": "Lateral Lunges", "sets": 3, "reps": "12", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" },
+      { "name": "Kettlebell Deadlifts", "sets": 4, "reps": "10", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" },
+      { "name": "Curtsy Lunges", "sets": 3, "reps": "12", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" }
+    ]
+  },
+  {
+    "id": "206",
+    "title": "Leg Day Finisher",
+    "level": "Advanced",
+    "type": "Lower Body",
+    "time": 25,
+    "kcal": 280,
+    "img": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800&auto=format&fit=crop",
+    "description": "A brutal, short-duration circuit meant to completely exhaust the leg muscles at the end of a session.",
+    "exercises": [
+      { "name": "Jumping Lunges", "sets": 3, "reps": "20", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" },
+      { "name": "Wall Sits", "sets": 3, "reps": "60s", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" },
+      { "name": "Tuck Jumps", "sets": 3, "reps": "15", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" }
+    ]
+  },
+  {
+    "id": "301",
+    "title": "Metabolic Conditioning",
+    "level": "Advanced",
+    "type": "Cardio",
+    "time": 30,
+    "kcal": 520,
+    "img": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800&auto=format&fit=crop",
+    "description": "High-intensity interval training designed to spike your heart rate and keep your metabolism burning long after the workout ends.",
+    "exercises": [
+      { "name": "Burpees", "sets": 4, "reps": "45s", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" },
+      { "name": "Mountain Climbers", "sets": 4, "reps": "45s", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" },
+      { "name": "Jump Squats", "sets": 4, "reps": "45s", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" }
+    ]
+  },
+  {
+    "id": "302",
+    "title": "Iron Will Steady State",
+    "level": "Intermediate",
+    "type": "Cardio",
+    "time": 60,
+    "kcal": 550,
+    "img": "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=800&auto=format&fit=crop",
+    "description": "Pace yourself. A longer duration, moderate-intensity session to build cardiovascular endurance and mental grit.",
+    "exercises": [
+      { "name": "High Knees", "sets": 5, "reps": "60s", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" },
+      { "name": "Jumping Jacks", "sets": 5, "reps": "60s", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" },
+      { "name": "Shadow Boxing", "sets": 5, "reps": "60s", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" }
+    ]
+  },
+  {
+    "id": "303",
+    "title": "Sprint Intervals",
+    "level": "Advanced",
+    "type": "Cardio",
+    "time": 25,
+    "kcal": 400,
+    "img": "https://images.unsplash.com/photo-1434682881908-b43d0467b798?q=80&w=800&auto=format&fit=crop",
+    "description": "Short, maximum-effort bursts followed by brief recovery periods. Excellent for improving VO2 max.",
+    "exercises": [
+      { "name": "Sprint", "sets": 8, "reps": "20s", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" },
+      { "name": "Rest/Walk", "sets": 8, "reps": "40s", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" },
+      { "name": "Squat Thrusts", "sets": 4, "reps": "30s", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" }
+    ]
+  },
+  {
+    "id": "304",
+    "title": "Beginner Aerobics",
+    "level": "Beginner",
+    "type": "Cardio",
+    "time": 30,
+    "kcal": 200,
+    "img": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=800&auto=format&fit=crop",
+    "description": "A low-impact introduction to keeping your heart rate elevated. Easy on the joints but great for the heart.",
+    "exercises": [
+      { "name": "Marching in Place", "sets": 3, "reps": "60s", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" },
+      { "name": "Step Jacks", "sets": 3, "reps": "60s", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" },
+      { "name": "Arm Circles", "sets": 3, "reps": "60s", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" }
+    ]
+  },
+  {
+    "id": "305",
+    "title": "Endurance Builder",
+    "level": "Intermediate",
+    "type": "Cardio",
+    "time": 45,
+    "kcal": 450,
+    "img": "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=800&auto=format&fit=crop",
+    "description": "Continuous, steady work designed to increase your aerobic threshold and stamina over time.",
+    "exercises": [
+      { "name": "Jump Rope", "sets": 4, "reps": "3m", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" },
+      { "name": "Skaters", "sets": 4, "reps": "60s", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" },
+      { "name": "Bear Crawls", "sets": 4, "reps": "45s", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" }
+    ]
+  },
+  {
+    "id": "306",
+    "title": "Agility & Quickness",
+    "level": "Advanced",
+    "type": "Cardio",
+    "time": 35,
+    "kcal": 380,
+    "img": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800&auto=format&fit=crop",
+    "description": "Fast footwork and directional changes. Burn calories while improving your athletic coordination.",
+    "exercises": [
+      { "name": "Lateral Shuffle", "sets": 4, "reps": "45s", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" },
+      { "name": "Fast Feet", "sets": 4, "reps": "30s", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" },
+      { "name": "Box Drill", "sets": 4, "reps": "60s", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" }
+    ]
+  },
+  {
+    "id": "401",
+    "title": "Iron Core Foundation",
+    "level": "Intermediate",
+    "type": "Core & Stability",
+    "time": 25,
+    "kcal": 210,
+    "img": "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=800&auto=format&fit=crop",
+    "description": "Strengthen your midsection. This routine attacks your abs and obliques from every angle, improving your overall stability.",
+    "exercises": [
+      { "name": "Hollow Body Holds", "sets": 3, "reps": "45s", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" },
+      { "name": "Russian Twists", "sets": 3, "reps": "20", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" },
+      { "name": "Dead Bugs", "sets": 3, "reps": "12-15", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" }
+    ]
+  },
+  {
+    "id": "402",
+    "title": "Kinetic Balance",
+    "level": "Beginner",
+    "type": "Core & Stability",
+    "time": 20,
+    "kcal": 150,
+    "img": "https://images.unsplash.com/photo-1434682881908-b43d0467b798?q=80&w=800&auto=format&fit=crop",
+    "description": "Focus on balance, breathwork, and deep core stabilizers. Perfect for recovery days or as a morning activation routine.",
+    "exercises": [
+      { "name": "Bird Dogs", "sets": 3, "reps": "10", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" },
+      { "name": "Side Planks", "sets": 3, "reps": "30s", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" },
+      { "name": "Glute March", "sets": 3, "reps": "16", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" }
+    ]
+  },
+  {
+    "id": "403",
+    "title": "Advanced Planking",
+    "level": "Advanced",
+    "type": "Core & Stability",
+    "time": 20,
+    "kcal": 180,
+    "img": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=800&auto=format&fit=crop",
+    "description": "Push your isometric strength to the limit with advanced plank variations that test your mental fortitude.",
+    "exercises": [
+      { "name": "Plank with Shoulder Taps", "sets": 3, "reps": "20", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" },
+      { "name": "Extended Plank", "sets": 3, "reps": "45s", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" },
+      { "name": "Plank Jacks", "sets": 3, "reps": "30", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" }
+    ]
+  },
+  {
+    "id": "404",
+    "title": "Oblique Torcher",
+    "level": "Intermediate",
+    "type": "Core & Stability",
+    "time": 25,
+    "kcal": 220,
+    "img": "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=800&auto=format&fit=crop",
+    "description": "Zero in on the sides of your core to build rotational strength and a tighter midsection.",
+    "exercises": [
+      { "name": "Bicycle Crunches", "sets": 3, "reps": "30", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" },
+      { "name": "Windshield Wipers", "sets": 3, "reps": "12", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" },
+      { "name": "Side Plank Dips", "sets": 3, "reps": "15", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" }
+    ]
+  },
+  {
+    "id": "405",
+    "title": "Posture Perfect",
+    "level": "Beginner",
+    "type": "Core & Stability",
+    "time": 15,
+    "kcal": 100,
+    "img": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800&auto=format&fit=crop",
+    "description": "Gentle, corrective exercises targeting the lower back and deep abdominal muscles to alleviate pain and improve posture.",
+    "exercises": [
+      { "name": "Cat-Cow Stretches", "sets": 3, "reps": "10", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" },
+      { "name": "Superman Holds", "sets": 3, "reps": "30s", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" },
+      { "name": "Pelvic Tilts", "sets": 3, "reps": "15", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" }
+    ]
+  },
+  {
+    "id": "406",
+    "title": "Dynamic Core",
+    "level": "Advanced",
+    "type": "Core & Stability",
+    "time": 30,
+    "kcal": 280,
+    "img": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800&auto=format&fit=crop",
+    "description": "Combine movement with core stabilization. A highly active core routine that mimics athletic performance.",
+    "exercises": [
+      { "name": "V-Ups", "sets": 4, "reps": "15", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" },
+      { "name": "Renegade Rows (Light)", "sets": 4, "reps": "12", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" },
+      { "name": "Toes to Bar (or Lying Leg Raises)", "sets": 4, "reps": "10", "vid": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" }
+    ]
+  }
+]

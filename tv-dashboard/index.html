@@ -1,323 +1,1154 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CouchCoach</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --bg:#09090b;--sf:#111113;--bd:#1c1c1e;
-  --tx:#e4e4e7;--dm:#52525b;
-  --g:#4ade80;--y:#facc15;--r:#f87171;
-  --mn:'SF Mono','Fira Code','Consolas',monospace;
-}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-  background:var(--bg);color:var(--tx);height:100vh;overflow:hidden}
-.s{display:none;height:100vh}.s.on{display:flex}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CouchCoach - TV Dashboard</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 
-/* ── PAIR ── */
-.pair{flex-direction:column;align-items:center;justify-content:center;gap:40px;text-align:center}
-.p-brand{font-family:var(--mn);font-size:18px;font-weight:700;letter-spacing:5px;
-  text-transform:uppercase;color:var(--g)}
-.p-sub{font-size:20px;color:var(--dm);font-weight:400}
-.p-code{font-family:var(--mn);font-size:min(12vw,120px);font-weight:800;
-  letter-spacing:12px;color:var(--tx);padding:24px 48px;
-  background:var(--sf);border:1px solid var(--bd);border-radius:20px}
-.p-wait{display:flex;align-items:center;gap:10px;color:var(--dm);font-size:15px}
-.spin{width:14px;height:14px;border:2px solid var(--bd);border-top-color:var(--g);
-  border-radius:50%;animation:sp .8s linear infinite}
-@keyframes sp{to{transform:rotate(360deg)}}
-
-/* ── DASH ── */
-.dash{flex-direction:column;padding:36px 48px;gap:28px}
-.d-head{display:flex;justify-content:space-between;align-items:center}
-.d-logo{font-family:var(--mn);font-size:13px;font-weight:700;
-  letter-spacing:3px;text-transform:uppercase;color:var(--g)}
-.d-live{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--dm)}
-.dot{width:10px;height:10px;border-radius:50%}
-.dot.on{background:var(--g);box-shadow:0 0 10px var(--g);animation:pu 2s infinite}
-.dot.off{background:var(--dm)}
-@keyframes pu{0%,100%{opacity:1}50%{opacity:.35}}
-
-.d-body{flex:1;display:flex;gap:24px;min-height:0}
-
-/* Main */
-.main{flex:2.2;display:flex;flex-direction:column;gap:20px}
-.hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  background:var(--sf);border:1px solid var(--bd);border-radius:16px;
-  padding:40px;text-align:center;transition:border-color .4s}
-.hero.good{border-color:var(--g)}.hero.warning{border-color:var(--y)}.hero.bad{border-color:var(--r)}
-.hero-txt{font-size:min(4vw,38px);font-weight:600;line-height:1.3;max-width:640px}
-.hero-ex{font-family:var(--mn);font-size:12px;color:var(--dm);
-  text-transform:uppercase;letter-spacing:2px;margin-top:14px}
-.hero-wait{font-size:min(3vw,28px);color:var(--dm);font-weight:400}
-
-.cards{display:flex;gap:14px}
-.card{flex:1;background:var(--sf);border:1px solid var(--bd);border-radius:14px;
-  padding:20px;text-align:center}
-.card-n{font-family:var(--mn);font-size:min(5vw,52px);font-weight:800}
-.card-l{font-size:11px;color:var(--dm);text-transform:uppercase;letter-spacing:2px;margin-top:4px}
-
-/* Timeline */
-.tl{flex:1;background:var(--sf);border:1px solid var(--bd);border-radius:16px;
-  padding:20px;overflow-y:auto;display:flex;flex-direction:column}
-.tl-h{font-family:var(--mn);font-size:10px;color:var(--dm);
-  text-transform:uppercase;letter-spacing:2px;margin-bottom:14px}
-.tl-list{flex:1;display:flex;flex-direction:column;gap:10px}
-.tl-i{display:flex;align-items:flex-start;gap:10px;padding:10px;
-  border-radius:8px;background:rgba(255,255,255,.02)}
-.tl-d{width:7px;height:7px;border-radius:50%;margin-top:6px;flex-shrink:0}
-.tl-d.good{background:var(--g)}.tl-d.warning{background:var(--y)}.tl-d.bad{background:var(--r)}
-.tl-t{font-size:13px;line-height:1.4}
-.tl-tm{font-family:var(--mn);font-size:10px;color:var(--dm);margin-top:2px}
-.tl-empty{color:var(--dm);font-size:13px;text-align:center;margin-top:36px}
-
-.voice{text-align:center;font-size:12px;color:var(--dm);padding-top:4px}
-.voice span{color:var(--g)}
-
-/* Scrollbar */
-::-webkit-scrollbar{width:4px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--bd);border-radius:4px}
-</style>
-</head>
-<body>
-
-<div id="pair" class="s pair on">
-  <div class="p-brand">CouchCoach</div>
-  <div class="p-sub">Enter this code on your phone</div>
-  <div class="p-code" id="code">· · ·</div>
-  <div class="p-wait"><div class="spin"></div><span>Waiting for phone to connect…</span></div>
-</div>
-
-<div id="dash" class="s dash">
-  <div class="d-head">
-    <div class="d-logo">CouchCoach</div>
-    <div class="d-live"><div class="dot" id="dot"></div><span id="lbl">Connected</span></div>
-  </div>
-  <div class="d-body">
-    <div class="main">
-      <div class="hero" id="hero">
-        <div class="hero-wait" id="hwait">Ready to start workout</div>
-        <div class="hero-txt" id="htxt" style="display:none"></div>
-        <div class="hero-ex" id="hex"></div>
-      </div>
-      <div class="cards">
-        <div class="card"><div class="card-n" id="tReps">0</div><div class="card-l">Reps</div></div>
-        <div class="card"><div class="card-n" id="tScore">—</div><div class="card-l">Form</div></div>
-        <div class="card"><div class="card-n" id="tTime">0:00</div><div class="card-l">Time</div></div>
-      </div>
-    </div>
-    <div class="tl">
-      <div class="tl-h">Activity Feed</div>
-      <div class="tl-list" id="tl"><div class="tl-empty">Coaching feedback will appear here</div></div>
-    </div>
-  </div>
-  <div class="voice">Say <span>"Coach"</span> followed by your question</div>
-  <div id="micStatus" class="voice" style="color:var(--dm)">🎤 Mic: starting...</div>
-  <div id="voiceNote" class="voice" style="display:none;color:var(--y);cursor:pointer" onclick="unlockAudio()">🔊 Tap anywhere to enable voice coaching</div>
-</div>
-
-<script>
-const API=location.origin;
-let code=null,poll=null,lastN=0;
-let lastSpokenFeedback='';
-let speaking=false;
-
-// Speak feedback via Polly
-async function speakFeedback(text){
-  if(speaking||!text||text===lastSpokenFeedback)return;
-  lastSpokenFeedback=text;
-  speaking=true;
-  try{
-    const url=API+'/api/speech?text='+encodeURIComponent(text);
-    const audio=new Audio(url);
-    audio.onended=()=>{speaking=false};
-    audio.onerror=()=>{speaking=false};
-    await audio.play();
-  }catch(e){speaking=false}
-}
-
-async function init(){
-  try{
-    const r=await fetch(API+'/api/session/create',{method:'POST'});
-    const d=await r.json();
-    code=d.code;
-    document.getElementById('code').textContent=code.slice(0,3)+' '+code.slice(3);
-    poll=setInterval(checkPair,1500);
-  }catch(e){document.getElementById('code').textContent='ERR'}
-}
-
-async function checkPair(){
-  try{
-    const r=await fetch(API+'/api/session/state?code='+code);
-    const d=await r.json();
-    if(d.paired){clearInterval(poll);goDash();poll=setInterval(pollState,800)}
-  }catch(e){}
-}
-
-function goDash(){
-  document.getElementById('pair').classList.remove('on');
-  document.getElementById('dash').classList.add('on');
-  document.getElementById('dash').addEventListener('click', unlockAudio, {once:true});
-  document.getElementById('voiceNote').style.display='block';
-  // Start always-on voice input
-  setTimeout(startListening, 1000);
-}
-
-function unlockAudio(){
-  const a=new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
-  a.play().then(()=>{
-    document.getElementById('voiceNote').style.display='none';
-  }).catch(()=>{});
-}
-
-async function pollState(){
-  try{
-    const r=await fetch(API+'/api/session/state?code='+code);
-    const d=await r.json();
-    const dot=document.getElementById('dot'),lbl=document.getElementById('lbl');
-    if(d.active){dot.className='dot on';lbl.textContent=d.exercise.toUpperCase()+' · Live'}
-    else{dot.className='dot off';lbl.textContent='Connected · Idle'}
-
-    document.getElementById('tReps').textContent=d.reps||0;
-    updScore(d.formScore);
-
-    if(d.elapsed>0){
-      const s=Math.floor(d.elapsed/1000),m=Math.floor(s/60);
-      document.getElementById('tTime').textContent=m+':'+String(s%60).padStart(2,'0');
-    }
-
-    const hero=document.getElementById('hero'),htxt=document.getElementById('htxt');
-    const hwait=document.getElementById('hwait'),hex=document.getElementById('hex');
-    if(d.lastAnalysis){
-      hwait.style.display='none';htxt.style.display='block';
-      htxt.textContent=d.lastAnalysis.feedback;hex.textContent=d.exercise;
-      hero.className='hero '+(d.lastAnalysis.score||'');
-      // Speak the feedback
-      speakFeedback(d.lastAnalysis.feedback);
-    }else if(d.active){
-      hwait.textContent='Analyzing your form…';hwait.style.display='block';
-      htxt.style.display='none';hero.className='hero';
-    }else{
-      hwait.textContent='Ready to start workout';hwait.style.display='block';
-      htxt.style.display='none';hero.className='hero';
-    }
-
-    if(d.feedback&&d.feedback.length!==lastN){lastN=d.feedback.length;renderTL(d.feedback)}
-  }catch(e){}
-}
-
-function updScore(sc){
-  const el=document.getElementById('tScore');
-  const m={good:'✓',warning:'~',bad:'✗'},c={good:'var(--g)',warning:'var(--y)',bad:'var(--r)'};
-  el.textContent=m[sc]||'—';el.style.color=c[sc]||'var(--tx)';
-}
-
-function renderTL(items){
-  const tl=document.getElementById('tl');
-  if(!items.length){tl.innerHTML='<div class="tl-empty">Coaching feedback will appear here</div>';return}
-  tl.innerHTML=items.map(i=>{
-    const t=new Date(i.time).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-    return`<div class="tl-i"><div class="tl-d ${i.score}"></div><div><div class="tl-t">${i.text}</div><div class="tl-tm">${t}</div></div></div>`;
-  }).join('');
-}
-
-// ══════════════════════════════════════
-// VOICE INPUT (always-on, "coach" wake word)
-// ══════════════════════════════════════
-let recognition = null;
-let micReady = false;
-
-function startListening() {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) {
-        document.getElementById('micStatus').textContent = '🎤 Voice not supported in this browser';
-        return;
-    }
-    recognition = new SR();
-    recognition.continuous = true;
-    recognition.interimResults = false;
-    recognition.lang = 'en-US';
-
-    recognition.onstart = () => {
-        micReady = true;
-        document.getElementById('micStatus').textContent = '🎤 Listening — say "Coach" to ask a question';
-        document.getElementById('micStatus').style.color = 'var(--g)';
-    };
-
-    recognition.onresult = (e) => {
-        const last = e.results[e.results.length - 1];
-        if (!last.isFinal) return;
-        const transcript = last[0].transcript.trim().toLowerCase();
-        if (transcript.includes('coach')) {
-            const parts = transcript.split('coach');
-            const question = parts.slice(1).join('coach').trim();
-            if (question.length > 2) {
-                handleVoiceQuestion(question);
-            } else {
-                speakFeedback("I'm here. What do you need?");
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Montserrat', 'sans-serif'],
+                    },
+                    colors: {
+                        app: {
+                            bg: '#080f14',
+                            surface: '#101f27',
+                            surfaceLight: '#162a35',
+                            border: '#1a2e3a',
+                            cyan: '#42d5e6',
+                            cyanDark: '#289aa8',
+                        }
+                    }
+                }
             }
         }
-    };
+    </script>
 
-    recognition.onerror = (e) => {
-        if (e.error === 'not-allowed') {
-            document.getElementById('micStatus').textContent = '🎤 Mic blocked — allow microphone access';
-            document.getElementById('micStatus').style.color = 'var(--r)';
-            return;
+    <style>
+        /* TV Specific Overrides & Smoothness */
+        body {
+            background-color: #080f14;
+            color: #ffffff;
+            overflow: hidden; 
+            user-select: none;
         }
-        setTimeout(restartListening, 1000);
-    };
 
-    recognition.onend = () => {
-        if (micReady && !speaking) setTimeout(restartListening, 300);
-    };
+        ::-webkit-scrollbar {
+            display: none;
+        }
 
-    recognition.start();
-}
+        .tv-focusable {
+            outline: none;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-function restartListening() {
-    try { if (recognition) recognition.start(); }
-    catch (e) { setTimeout(restartListening, 1000); }
-}
+        .tv-focusable:focus {
+            outline: 4px solid #42d5e6;
+            outline-offset: 2px;
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(66, 213, 230, 0.4);
+            z-index: 50;
+        }
 
-async function handleVoiceQuestion(question) {
-    document.getElementById('micStatus').textContent = '🎤 "' + question + '" — thinking...';
-    document.getElementById('micStatus').style.color = 'var(--y)';
-    try { recognition.stop(); } catch(e) {}
+        nav .tv-focusable:focus {
+            transform: scale(1.1);
+        }
 
-    try {
-        const r = await fetch(API + '/api/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ question, code })
-        });
-        const d = await r.json();
-        const hero = document.getElementById('hero');
-        const htxt = document.getElementById('htxt');
-        const hwait = document.getElementById('hwait');
-        const hex = document.getElementById('hex');
-        hwait.style.display = 'none';
-        htxt.style.display = 'block';
-        htxt.textContent = d.answer;
-        hex.textContent = 'COACH';
-        hero.className = 'hero good';
-        lastSpokenFeedback = '';
-        await speakFeedback(d.answer);
-    } catch (e) {
-        await speakFeedback("Sorry, I didn't catch that. Try again.");
-    }
+        .nav-active {
+            background: linear-gradient(135deg, #42d5e6, #289aa8);
+            color: #080f14 !important;
+            box-shadow: 0 0 20px rgba(66, 213, 230, 0.3);
+        }
 
-    document.getElementById('micStatus').textContent = '🎤 Listening — say "Coach" to ask a question';
-    document.getElementById('micStatus').style.color = 'var(--g)';
-    const wait = setInterval(() => {
-        if (!speaking) { clearInterval(wait); restartListening(); }
-    }, 300);
-}
+        .circle-progress {
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            stroke-dasharray: 251.2;
+            stroke-dashoffset: 50.24;
+            transition: stroke-dashoffset 1s ease-out;
+        }
 
-init();
-</script>
+        .view-active {
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 10;
+        }
+        .view-hidden {
+            opacity: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes scan {
+            0% { transform: translateY(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(220px); opacity: 0; }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+        .skeleton-load {
+            background: #162a35;
+            background-image: linear-gradient(90deg, #162a35 0px, #1a2e3a 40px, #162a35 80px);
+            background-size: 1000px 100%;
+            animation: shimmer 2s infinite linear;
+        }
+
+        /* AI Feedback Pop Animation */
+        @keyframes feedback-pop {
+            0% { transform: translateY(40px) scale(0.9); opacity: 0; }
+            60% { transform: translateY(-10px) scale(1.05); opacity: 1; }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        .animate-feedback {
+            animation: feedback-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .hud-text-shadow {
+            text-shadow: 0 4px 12px rgba(0,0,0,0.8);
+        }
+    </style>
+</head>
+<body class="w-screen h-screen flex font-sans text-slate-200">
+
+    <!-- Left Sidebar -->
+    <nav class="w-[100px] sm:w-[120px] flex flex-col items-center py-8 border-r border-app-border bg-app-bg shrink-0 z-20 relative shadow-[5px_0_20px_rgba(0,0,0,0.5)]">
+        <div class="mb-12 flex flex-col items-center cursor-default">
+            <span class="font-display font-black text-2xl tracking-tighter text-white flex flex-col items-center leading-[0.9]">
+                <span>Couch</span>
+                <span class="text-app-cyan">Coach</span>
+            </span>
+        </div>
+
+        <div class="flex flex-col gap-6">
+            <button id="nav-home" onclick="UI.goHome()" class="tv-focusable nav-active w-16 h-16 rounded-2xl flex items-center justify-center text-slate-800 transition-colors" data-nav="home">
+                <i data-lucide="home" class="w-7 h-7"></i>
+            </button>
+            <button id="nav-mylist" onclick="UI.openMyList()" class="tv-focusable w-16 h-16 rounded-2xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-app-surface transition-colors" data-nav="mylist">
+                <i data-lucide="bookmark" class="w-7 h-7"></i>
+            </button>
+            <button class="tv-focusable w-16 h-16 rounded-2xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-app-surface transition-colors" data-nav="fullscreen">
+                <i data-lucide="maximize" class="w-7 h-7"></i>
+            </button>
+            <button class="tv-focusable w-16 h-16 rounded-2xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-app-surface transition-colors" data-nav="stats">
+                <i data-lucide="bar-chart-2" class="w-7 h-7"></i>
+            </button>
+        </div>
+
+        <div class="flex flex-col gap-6 mt-auto">
+            <button class="tv-focusable w-16 h-16 rounded-2xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-app-surface transition-colors">
+                <i data-lucide="user" class="w-7 h-7"></i>
+            </button>
+            <button class="tv-focusable w-16 h-16 rounded-2xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-app-surface transition-colors">
+                <i data-lucide="settings" class="w-7 h-7"></i>
+            </button>
+        </div>
+    </nav>
+
+    <main class="flex-1 relative flex flex-col overflow-hidden bg-app-bg">
+        
+        <!-- Shared Hero Background -->
+        <div class="absolute inset-0 z-0 pointer-events-none" id="main-bg-container">
+            <img id="main-bg-img" src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1920&auto=format&fit=crop" alt="Workout Background" class="w-full h-full object-cover opacity-25 mix-blend-luminosity transition-all duration-700">
+            <div class="absolute inset-0 bg-gradient-to-r from-app-bg via-app-bg/80 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-app-bg via-transparent to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-b from-app-bg/50 via-transparent to-transparent"></div>
+        </div>
+
+        <!-- DASHBOARD VIEW -->
+        <div id="dashboard-view" class="view-active absolute inset-0 flex flex-col p-10 lg:p-14 overflow-y-auto scroll-smooth transition-opacity duration-300">
+            
+            <div class="max-w-4xl mt-4 mb-14 shrink-0">
+                <div class="inline-flex items-center px-4 py-1.5 rounded-full bg-app-cyan/10 border border-app-cyan/20 text-app-cyan text-[11px] font-bold tracking-[0.2em] uppercase mb-6">
+                    <div class="w-2 h-2 rounded-full bg-app-cyan mr-2 animate-pulse"></div>
+                    Recommended For You
+                </div>
+                <h1 class="font-display text-5xl lg:text-7xl font-black text-white leading-[1.1] mb-5 tracking-tight uppercase" id="hero-title">
+                    Explosive Power<br/>& Kinetic Form
+                </h1>
+                <p class="text-slate-400 text-lg lg:text-xl mb-10 max-w-2xl leading-relaxed font-light" id="hero-desc">
+                    Master your stabilization and maximize output. Focus today: form consistency at high volume. Perfect for clearing your weekly goals.
+                </p>
+                <div class="flex items-center gap-5">
+                    <button onclick="UI.openDetail('demo')" class="tv-focusable bg-app-cyan text-slate-900 px-8 py-4 rounded-full font-bold text-lg flex items-center gap-3 transition-colors hover:bg-white group">
+                        <i data-lucide="play" class="fill-current w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                        Start Workout
+                    </button>
+                    <button id="hero-list-btn" onclick="UI.toggleMyList('demo')" class="tv-focusable bg-app-surface/60 backdrop-blur-md border border-app-border text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-app-surface transition-colors flex items-center gap-3">
+                        <i data-lucide="plus" id="hero-list-icon" class="w-5 h-5"></i>
+                        <span id="hero-list-text">My List</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Overview -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-16 shrink-0">
+                <div class="bg-app-surface/80 backdrop-blur-xl border border-app-border rounded-[2rem] p-8 flex flex-col shadow-xl min-h-[260px]">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-slate-400 text-base font-bold tracking-widest uppercase">Form Score</span>
+                        <i data-lucide="sparkles" class="text-app-cyan w-6 h-6"></i>
+                    </div>
+                    <div class="flex-1 flex items-center justify-center gap-5 pb-4">
+                        <span class="font-display text-[6rem] font-light text-white leading-none tracking-tighter">94</span>
+                        <div class="flex flex-col pb-2">
+                            <span class="text-app-cyan text-lg font-bold flex items-center gap-1">
+                                <i data-lucide="trending-up" class="w-5 h-5"></i> 12%
+                            </span>
+                            <span class="text-slate-500 text-xs font-semibold uppercase tracking-wider mt-1">vs last session</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-app-surface/80 backdrop-blur-xl border border-app-border rounded-[2rem] p-8 flex flex-col relative shadow-xl min-h-[260px]">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-slate-400 text-base font-bold tracking-widest uppercase">Total Volume</span>
+                        <i data-lucide="dumbbell" class="text-app-cyan w-6 h-6"></i>
+                    </div>
+                    <div class="flex-1 flex flex-col items-center justify-center w-full">
+                        <div class="flex items-end gap-3 mb-8">
+                            <span class="font-display text-[5rem] font-light text-white leading-none tracking-tighter">12.4</span>
+                            <span class="text-app-cyan text-xl font-bold pb-2 uppercase tracking-wide">k lbs</span>
+                        </div>
+                        <div class="w-full flex gap-3 h-16 items-end justify-center px-4">
+                            <div class="w-full max-w-[2rem] bg-slate-700/40 rounded-t-lg h-[40%]"></div>
+                            <div class="w-full max-w-[2rem] bg-slate-700/40 rounded-t-lg h-[55%]"></div>
+                            <div class="w-full max-w-[2rem] bg-slate-700/40 rounded-t-lg h-[70%]"></div>
+                            <div class="w-full max-w-[2rem] bg-app-cyan rounded-t-lg h-[100%] shadow-[0_0_15px_rgba(66,213,230,0.3)] relative">
+                                <span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-app-cyan tracking-wider">TODAY</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-app-surface/80 backdrop-blur-xl border border-app-border rounded-[2rem] p-8 flex flex-col relative shadow-xl min-h-[260px]">
+                    <span class="text-slate-400 text-base font-bold tracking-widest uppercase absolute top-8 left-8">Weekly Goal</span>
+                    <div class="flex-1 flex items-center justify-center mt-8 relative">
+                        <svg class="w-36 h-36" viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" r="40" fill="transparent" stroke="#1a2e3a" stroke-width="8"></circle>
+                            <circle cx="50" cy="50" r="40" fill="transparent" stroke="#42d5e6" stroke-width="8" stroke-linecap="round" class="circle-progress drop-shadow-[0_0_8px_rgba(66,213,230,0.5)]"></circle>
+                        </svg>
+                        <span class="absolute font-display text-4xl font-light text-white tracking-tighter">80%</span>
+                    </div>
+                    <div class="mt-4 text-center">
+                        <h4 class="font-display text-white font-bold text-lg tracking-wide mb-1">4 / 5 <span class="text-slate-400 font-medium">Sessions</span></h4>
+                        <p class="text-slate-500 text-xs font-medium tracking-wide">1 session remaining to hit streak</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Dynamic Rows Injection Point -->
+            <div id="dynamic-workout-rows" class="flex flex-col mt-auto pb-10">
+                <!-- Skeleton Loader will be inserted here initially -->
+            </div>
+        </div>
+
+        <!-- MY LIST VIEW -->
+        <div id="mylist-view" class="view-hidden absolute inset-0 flex flex-col p-10 lg:p-14 overflow-y-auto scroll-smooth transition-opacity duration-300">
+            <h1 class="font-display text-4xl lg:text-5xl font-black text-white leading-[1.1] mb-10 tracking-tight uppercase shrink-0">My List</h1>
+            <div id="mylist-empty" class="flex-1 flex flex-col items-center justify-center opacity-50 pb-20">
+                <i data-lucide="bookmark" class="w-20 h-20 mb-6 text-slate-500"></i>
+                <h3 class="text-2xl font-display font-bold text-slate-300 mb-2">Your List is Empty</h3>
+                <p class="text-slate-400 text-lg">Workouts you add will appear here.</p>
+            </div>
+            <div id="mylist-container" class="flex flex-wrap gap-6 pb-20 content-start"></div>
+        </div>
+
+        <!-- DETAIL VIEW -->
+        <div id="detail-view" class="view-hidden absolute inset-0 flex transition-opacity duration-300">
+            <div id="detail-scroll-pane" class="w-5/12 h-full overflow-y-auto scroll-smooth scrollbar-hide relative z-10 bg-app-bg/95 backdrop-blur-2xl border-r border-app-border shadow-2xl">
+                <div class="flex flex-col p-12">
+                    <button onclick="UI.closeDetail()" class="tv-focusable flex items-center gap-2 text-slate-400 hover:text-white w-fit px-5 py-3 rounded-2xl bg-app-surface border border-app-border mb-8 transition-colors focus:bg-white focus:text-slate-900 group shrink-0">
+                        <i data-lucide="arrow-left" class="w-6 h-6 group-focus:text-slate-900"></i> <span class="font-bold tracking-wide">Back</span>
+                    </button>
+                    <div class="flex items-center gap-3 mb-4 shrink-0" id="detail-tags">
+                        <span id="detail-level" class="bg-app-cyan/10 border border-app-cyan/20 text-app-cyan text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Level</span>
+                        <span id="detail-type" class="bg-slate-800 border border-slate-700 text-slate-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Type</span>
+                    </div>
+                    <h1 id="detail-title" class="font-display text-4xl lg:text-5xl font-black text-white leading-[1.1] mb-4 tracking-tight uppercase shrink-0 text-shadow-xl">Loading...</h1>
+                    <div class="flex items-center gap-6 text-slate-300 text-sm font-semibold tracking-wide mb-6 shrink-0">
+                        <span class="flex items-center gap-2"><i data-lucide="clock" class="w-5 h-5 text-slate-500"></i> <span id="detail-time">0</span> min</span>
+                        <span class="flex items-center gap-2"><i data-lucide="flame" class="w-5 h-5 text-app-cyan"></i> <span id="detail-kcal">0</span> kcal</span>
+                    </div>
+                    <p id="detail-desc" class="text-slate-400 text-base leading-relaxed mb-8 shrink-0">Loading description...</p>
+                    <div class="flex items-center gap-4 shrink-0 mb-10">
+                        <button id="detail-start-btn" onclick="Engine.startWorkoutConnection()" class="tv-focusable bg-app-cyan text-slate-900 px-8 py-4 rounded-full font-bold text-xl flex items-center justify-center gap-3 transition-colors hover:bg-white shadow-[0_0_20px_rgba(66,213,230,0.3)] flex-1">
+                            <i data-lucide="play" class="fill-current w-6 h-6"></i>
+                            Start Workout
+                        </button>
+                        <button id="detail-list-btn" onclick="UI.toggleMyList(UI.currentDetailId)" class="tv-focusable bg-app-surface/60 border border-app-border text-white rounded-full font-semibold hover:bg-app-surface transition-all duration-300 ease-out flex items-center justify-center group h-[60px] w-[60px] focus:w-[150px]">
+                            <i data-lucide="plus" id="detail-list-icon" class="w-6 h-6 shrink-0 transition-transform group-focus:scale-110"></i>
+                            <span id="detail-list-text" class="whitespace-nowrap overflow-hidden transition-all duration-300 max-w-0 opacity-0 group-focus:max-w-[100px] group-focus:opacity-100 group-focus:ml-2 font-bold tracking-wide">My List</span>
+                        </button>
+                    </div>
+                    <h3 class="font-display font-bold text-slate-500 uppercase tracking-widest text-xs mb-4 shrink-0">Exercises (<span id="detail-ex-count">0</span>)</h3>
+                    <div id="detail-exercises" class="flex flex-col gap-3 px-6 -mx-6 pt-4 pb-12"></div>
+                </div>
+            </div>
+            <div class="w-7/12 h-full relative bg-black flex items-center justify-center">
+                <video id="exercise-video" class="w-full h-full object-cover opacity-80" loop muted playsinline>
+                    <source src="" type="video/mp4">
+                </video>
+                <div class="absolute inset-0 bg-gradient-to-r from-app-bg/95 via-transparent to-transparent"></div>
+                <div class="absolute bottom-0 inset-x-0 h-1/3 bg-gradient-to-t from-app-bg via-transparent to-transparent"></div>
+            </div>
+        </div>
+
+        <!-- CONNECT PHONE VIEW -->
+        <div id="connect-view" class="view-hidden fixed inset-0 flex bg-app-bg z-[60] transition-opacity duration-500">
+            <div class="w-1/2 h-full flex flex-col p-14 lg:p-20 relative z-10">
+                <div class="flex flex-col items-start cursor-default shrink-0">
+                    <span class="font-display font-black text-2xl tracking-tighter text-white flex flex-col items-start leading-[0.9]">
+                        <span>Couch</span>
+                        <span class="text-app-cyan">Coach</span>
+                    </span>
+                </div>
+                <div class="flex-1 flex flex-col justify-center max-w-xl">
+                    <h1 class="font-display text-5xl lg:text-7xl font-black text-white mb-12 leading-[1.1] tracking-tight">
+                        Let's sync your<br><span class="text-app-cyan">Phone Camera</span>
+                    </h1>
+                    <div class="flex flex-col gap-10 mb-16">
+                        <div class="flex gap-6 items-start">
+                            <div class="w-12 h-12 rounded-xl bg-app-surface border border-app-border flex items-center justify-center text-app-cyan font-bold font-display shrink-0 text-xl shadow-[0_0_15px_rgba(66,213,230,0.15)]">1</div>
+                            <div class="mt-1">
+                                <h3 class="text-white font-bold text-xl mb-2">Open your phone's camera</h3>
+                                <p class="text-slate-400 text-sm leading-relaxed">Or visit and follow the instructions on <span class="text-white font-semibold">couchcoach.tv/link</span></p>
+                            </div>
+                        </div>
+                        <div class="flex gap-6 items-start">
+                            <div class="w-12 h-12 rounded-xl bg-app-surface border border-app-border flex items-center justify-center text-app-cyan font-bold font-display shrink-0 text-xl shadow-[0_0_15px_rgba(66,213,230,0.15)]">2</div>
+                            <div class="mt-1">
+                                <h3 class="text-white font-bold text-xl mb-2">Scan the QR code or enter PIN</h3>
+                                <p class="text-slate-400 text-sm leading-relaxed">Establish a secure link between your TV and your mobile camera.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-5 mt-4">
+                        <button id="connect-back-btn" onclick="Engine.cancelConnection()" class="tv-focusable bg-app-surface border border-app-border text-white px-8 py-4 rounded-full font-semibold hover:bg-app-surfaceLight transition-colors flex items-center gap-3">
+                            <i data-lucide="arrow-left" class="w-5 h-5"></i> Go Back
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="w-1/2 h-full relative flex items-center justify-center border-l border-app-border/50">
+                <div class="absolute inset-0 z-0 bg-app-bg">
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[radial-gradient(circle,rgba(255,165,0,0.15)_0%,rgba(0,0,0,0)_70%)] blur-2xl"></div>
+                </div>
+                <div class="bg-app-surface/60 backdrop-blur-2xl border border-white/10 p-10 lg:p-12 rounded-[3rem] shadow-[0_30px_60px_rgba(0,0,0,0.6)] flex flex-col items-center relative z-10 w-[420px]">
+                    <div class="bg-white p-4 rounded-3xl mb-8 shadow-inner w-64 h-64 flex items-center justify-center relative group">
+                        <img id="qr-code-img" src="" alt="QR Code" class="w-full h-full mix-blend-multiply opacity-0 transition-opacity duration-500">
+                        <div class="absolute inset-x-4 top-4 h-1 bg-app-cyan/50 shadow-[0_0_10px_#42d5e6] animate-[scan_2s_ease-in-out_infinite]"></div>
+                    </div>
+                    <div class="flex items-center w-full gap-4 mb-6 opacity-60">
+                        <div class="h-px bg-slate-600 flex-1"></div>
+                        <span class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Or Use Manual Code</span>
+                        <div class="h-px bg-slate-600 flex-1"></div>
+                    </div>
+                    <div id="pin-display" class="font-display text-4xl lg:text-5xl font-black text-white tracking-widest mb-10 bg-black/40 px-8 py-4 rounded-2xl border border-white/5 shadow-inner whitespace-nowrap">
+                        --- ---
+                    </div>
+                    <div class="flex flex-col items-center gap-4 w-full text-center">
+                        <span id="sync-status-text" class="text-app-cyan text-sm lg:text-base font-bold tracking-widest uppercase">Waiting for sync</span>
+                        <div class="flex gap-2 mb-6" id="sync-loader">
+                            <div class="w-2 h-2 rounded-full bg-app-cyan animate-bounce" style="animation-delay: 0ms"></div>
+                            <div class="w-2 h-2 rounded-full bg-app-cyan/60 animate-bounce" style="animation-delay: 150ms"></div>
+                            <div class="w-2 h-2 rounded-full bg-app-cyan/30 animate-bounce" style="animation-delay: 300ms"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- WORKOUT HUD VIEW -->
+        <div id="workout-view" class="view-hidden fixed inset-0 flex flex-col z-[80] bg-black transition-opacity duration-700 overflow-hidden">
+            <!-- Background Video Demo -->
+            <video id="pro-demo-video-main" class="absolute inset-0 w-full h-full object-cover" loop muted playsinline>
+                <source src="https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+            </video>
+            
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/60 pointer-events-none"></div>
+
+            <!-- HUD TOP BAR -->
+            <div class="relative z-10 flex justify-between items-start p-10 lg:p-14">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="inline-flex items-center gap-2 bg-app-cyan/20 border border-app-cyan/30 text-app-cyan text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-widest backdrop-blur-md">
+                            <div class="w-1.5 h-1.5 rounded-full bg-app-cyan animate-pulse"></div>
+                            EXERCISE <span id="hud-ex-current">1</span> OF <span id="hud-ex-total">3</span>
+                        </div>
+                        <div class="inline-flex items-center gap-2 bg-white/10 border border-white/10 text-slate-300 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-widest backdrop-blur-md" id="hud-next-wrapper">
+                            NEXT: <span id="hud-next-ex">GOBLET SQUATS</span>
+                        </div>
+                    </div>
+                    <h1 id="hud-ex-title" class="font-display text-5xl lg:text-7xl font-black text-white uppercase tracking-tight drop-shadow-2xl hud-text-shadow">Exercise Name</h1>
+                </div>
+                
+                <!-- Camera Mirror & Pause -->
+                <div class="flex items-start gap-6">
+                    <div class="w-64 aspect-video rounded-2xl overflow-hidden border border-white/20 shadow-2xl bg-black/40 backdrop-blur-md relative group">
+                        <video id="user-camera-pip" class="w-full h-full object-cover scale-x-[-1]" autoplay playsinline muted></video>
+                        <div id="pip-no-camera" class="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm">
+                            <i data-lucide="video-off" class="w-8 h-8 text-slate-500 mb-1"></i>
+                            <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">No Camera</span>
+                        </div>
+                        <div id="pip-live-badge" class="absolute bottom-3 left-3 flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-2 py-1 rounded-md hidden">
+                            <div class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
+                            <span class="text-[8px] font-bold text-white uppercase tracking-widest">Live</span>
+                        </div>
+                    </div>
+                    <button id="workout-pause-btn" onclick="Engine.openPauseMenu()" class="tv-focusable bg-white/10 backdrop-blur-md border border-white/10 text-white p-5 rounded-full hover:bg-white/20 transition-colors flex items-center justify-center">
+                        <i data-lucide="pause" id="workout-pause-icon" class="w-8 h-8 fill-current"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- HUD AI FEEDBACK -->
+            <div class="relative z-10 flex-1 flex flex-col items-center justify-center pb-20 pointer-events-none">
+                 <div id="ai-feedback-pill" class="bg-app-cyan text-app-bg px-12 py-5 rounded-full shadow-2xl flex items-center gap-4 border-b-4 border-black/10 opacity-0 transition-opacity">
+                    <i data-lucide="zap" id="ai-feedback-icon" class="w-10 h-10 fill-current"></i>
+                    <span id="ai-feedback-text" class="font-display text-3xl lg:text-4xl font-black tracking-wide uppercase">Ready to begin?</span>
+                 </div>
+            </div>
+
+            <!-- HUD BOTTOM STATS -->
+            <div class="absolute bottom-0 inset-x-0 p-10 lg:p-14 pb-12 flex items-end justify-between z-10 pointer-events-none">
+                <div class="flex flex-col w-48">
+                    <span class="text-slate-400 text-xs font-bold tracking-[0.4em] uppercase mb-2 ml-1">Form Score</span>
+                    <span class="font-display text-8xl font-light text-white leading-none hud-text-shadow"><span id="hud-form">94</span><span class="text-2xl text-slate-500 ml-1 font-bold">%</span></span>
+                </div>
+
+                <div class="flex flex-col items-center transform translate-y-4">
+                    <span class="text-app-cyan text-[11px] font-black tracking-[0.5em] uppercase mb-4" id="hud-center-label">ACTIVE TIME</span>
+                    <div class="flex items-baseline gap-2">
+                        <span id="hud-center-val" class="font-display text-[14rem] font-black text-white leading-[0.75] hud-text-shadow drop-shadow-[0_0_50px_rgba(66,213,230,0.2)]">00:00</span>
+                        <span id="hud-center-sub" class="font-display text-6xl font-bold text-white/20 tracking-tighter"></span>
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-end w-48">
+                    <span class="text-slate-400 text-xs font-bold tracking-[0.4em] uppercase mb-2 text-right mr-1">Sets</span>
+                    <span class="font-display text-8xl font-light text-white leading-none text-right hud-text-shadow"><span id="hud-sets">1</span><span class="text-2xl text-slate-500 ml-2 font-bold uppercase">/ 4</span></span>
+                </div>
+            </div>
+            
+            <!-- PAUSE MENU OVERLAY -->
+            <div id="pause-menu-overlay" class="absolute inset-0 bg-app-bg/90 backdrop-blur-2xl z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+                <div class="flex flex-col items-center w-full max-w-sm">
+                    <h2 class="font-display text-6xl font-black text-white uppercase tracking-widest mb-12">Paused</h2>
+                    <div class="flex flex-col gap-4 w-full">
+                        <button id="resume-workout-btn" onclick="Engine.resumeWorkout()" class="tv-focusable bg-app-cyan text-slate-900 px-8 py-5 rounded-2xl font-bold text-xl flex items-center justify-center gap-3 w-full">
+                            <i data-lucide="play" class="fill-current w-6 h-6"></i> Resume
+                        </button>
+                        <button onclick="Engine.skipExercise()" class="tv-focusable bg-white/10 border border-white/20 text-white px-8 py-5 rounded-2xl font-semibold text-lg flex items-center justify-center gap-3 w-full hover:bg-white/20 focus:bg-white/20 transition-colors">
+                            <i data-lucide="skip-forward" class="w-5 h-5"></i> Skip Exercise
+                        </button>
+                        <button onclick="Engine.exitWorkout()" class="tv-focusable bg-white/5 border border-white/10 text-white px-8 py-5 rounded-2xl font-semibold text-lg flex items-center justify-center gap-3 w-full hover:bg-white/10 focus:bg-white/10 transition-colors">
+                            <i data-lucide="x" class="w-5 h-5"></i> End Session
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GLOBAL TOAST -->
+        <div id="tv-toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-app-surfaceLight border border-app-cyan text-white px-8 py-4 rounded-full font-bold shadow-[0_10px_30px_rgba(0,0,0,0.8)] z-[100] pointer-events-none transition-opacity duration-300 opacity-0 flex items-center gap-3">
+            <i data-lucide="info" id="toast-icon" class="w-5 h-5 text-app-cyan"></i>
+            <span id="toast-message">Message</span>
+        </div>
+
+    </main>
+
+    <!-- Switched to a module script to support Firebase Imports -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- FIREBASE SETUP ---
+        // It uses the canvas environment's config if available, otherwise it falls back to the manual config you provide.
+        const firebaseConfig = typeof __firebase_config !== 'undefined' && __firebase_config 
+            ? JSON.parse(__firebase_config) 
+            : {
+                apiKey: "AIzaSyAYhPAn11OkDpfzUrPgWgV9r47qJU6721M",
+                authDomain: "couchcoachhackathon.firebaseapp.com",
+                projectId: "couchcoachhackathon",
+                storageBucket: "couchcoachhackathon.firebasestorage.app",
+                messagingSenderId: "407445984088",
+                appId: "1:407445984088:web:7bfc1cc7e6905bc94e8b2d",
+                measurementId: "G-F1JP8W3Y7T"
+            };
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'couchcoachhackathon';
+        let app, auth, db;
+
+        // Only initialize if we have a valid config
+        if (Object.keys(firebaseConfig).length > 0) {
+            try {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                const initAuth = async () => {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                };
+                initAuth();
+            } catch (e) {
+                console.error("Firebase init failed:", e);
+            }
+        }
+
+        /* =========================================================================
+           1. MOCK DATA STORE (Simulates Local Persistence & Async Fetching)
+           ========================================================================= */
+        const DB = {
+            _myList: new Set(),
+            _catalogCache: null, // Caches the fetched JSON to avoid repeated network calls
+
+            // Simulating API Calls using Fetch
+            async getCatalog() {
+                if (this._catalogCache) return this._catalogCache;
+                try {
+                    // Simulating a network delay, shortened so spatial nav finds the row immediately
+                    await new Promise(resolve => setTimeout(resolve, 200)); 
+                    const response = await fetch('workouts.json');
+                    
+                    if (!response.ok) throw new Error("Network response was not ok");
+                    
+                    const data = await response.json();
+                    this._catalogCache = data;
+                    return data;
+                } catch (error) {
+                    console.error("Failed to load catalog", error);
+                    UI.showToast("Failed to load workouts from JSON", "alert-circle");
+                    return [];
+                }
+            },
+            async getWorkout(id) {
+                const catalog = await this.getCatalog();
+                return catalog.find(w => w.id === id) || null;
+            },
+            async getMyList() {
+                const catalog = await this.getCatalog();
+                return Array.from(this._myList).map(id => catalog.find(w => w.id === id)).filter(Boolean);
+            },
+            async toggleMyList(id) {
+                if (this._myList.has(id)) { this._myList.delete(id); return false; }
+                else { this._myList.add(id); return true; }
+            },
+            isSaved(id) { return this._myList.has(id); }
+        };
+
+        /* =========================================================================
+           2. UI MANAGER (View Switching, Rendering, Spatial Nav)
+           ========================================================================= */
+        const UI = {
+            currentViewId: 'dashboard-view',
+            historyStack: [],
+            lastFocusedCard: null,
+            currentDetailId: null,
+
+            init() {
+                this.renderDashboardSkeletons();
+                this.loadDashboardData();
+                this.setupSpatialNav();
+                lucide.createIcons();
+                setTimeout(() => document.getElementById('dashboard-view').querySelector('.tv-focusable').focus(), 100);
+            },
+
+            showToast(message, iconName = 'info') {
+                const toast = document.getElementById('tv-toast');
+                document.getElementById('toast-message').innerText = message;
+                document.getElementById('toast-icon').setAttribute('data-lucide', iconName);
+                lucide.createIcons();
+                toast.style.opacity = '1';
+                setTimeout(() => { toast.style.opacity = '0'; }, 3000);
+            },
+
+            switchView(newViewId, isBack = false) {
+                if (this.currentViewId === newViewId) return;
+                document.getElementById(this.currentViewId).classList.replace('view-active', 'view-hidden');
+                document.getElementById(newViewId).classList.replace('view-hidden', 'view-active');
+                
+                const isOverlay = ['connect-view', 'workout-view'].includes(newViewId);
+                const wasOverlay = ['connect-view', 'workout-view'].includes(this.currentViewId);
+                
+                if (!isBack && !isOverlay && !wasOverlay) this.historyStack.push(this.currentViewId); 
+                this.currentViewId = newViewId;
+
+                ['nav-home', 'nav-mylist'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if(!el) return;
+                    if((newViewId === 'dashboard-view' && id === 'nav-home') || (newViewId === 'mylist-view' && id === 'nav-mylist')) {
+                        el.classList.add('nav-active', 'text-slate-800'); el.classList.remove('text-slate-400');
+                    } else {
+                        el.classList.remove('nav-active', 'text-slate-800'); el.classList.add('text-slate-400');
+                    }
+                });
+            },
+
+            goHome() {
+                if (this.currentViewId === 'detail-view') document.getElementById('exercise-video').pause();
+                Engine.cleanup();
+                this.historyStack = []; 
+                this.switchView('dashboard-view', true);
+                setTimeout(() => document.getElementById('dashboard-view').querySelector('.tv-focusable').focus(), 100);
+            },
+
+            async openMyList() {
+                this.switchView('mylist-view');
+                const list = await DB.getMyList();
+                const container = document.getElementById('mylist-container');
+                const emptyState = document.getElementById('mylist-empty');
+                
+                if (list.length === 0) {
+                    container.innerHTML = ''; emptyState.style.display = 'flex';
+                } else {
+                    emptyState.style.display = 'none';
+                    container.innerHTML = list.map(item => this.createCardHTML(item)).join('');
+                    lucide.createIcons();
+                }
+                setTimeout(() => {
+                    const first = document.getElementById('mylist-view').querySelector('.tv-focusable');
+                    if (first) first.focus();
+                }, 100);
+            },
+
+            async toggleMyList(id) {
+                const isNowSaved = await DB.toggleMyList(id);
+                this.showToast(isNowSaved ? "Added to My List" : "Removed from My List", isNowSaved ? "check-circle" : "info");
+                this.updateListButtons(id, isNowSaved);
+                if(this.currentViewId === 'mylist-view') this.openMyList(); // Refresh if looking at it
+            },
+
+            updateListButtons(id, isSaved) {
+                const heroBtn = document.getElementById('hero-list-btn');
+                if (heroBtn && id === 'demo') {
+                    heroBtn.innerHTML = `<i data-lucide="${isSaved ? 'check' : 'plus'}" id="hero-list-icon" class="w-5 h-5"></i><span id="hero-list-text">${isSaved ? 'Saved to List' : 'My List'}</span>`;
+                }
+                const detailBtn = document.getElementById('detail-list-btn');
+                if (detailBtn && id === this.currentDetailId) {
+                    detailBtn.innerHTML = `<i data-lucide="${isSaved ? 'check' : 'plus'}" id="detail-list-icon" class="w-6 h-6 shrink-0 transition-transform group-focus:scale-110"></i><span id="detail-list-text" class="whitespace-nowrap overflow-hidden transition-all duration-300 max-w-0 opacity-0 group-focus:max-w-[100px] group-focus:opacity-100 group-focus:ml-2 font-bold tracking-wide">${isSaved ? 'Saved' : 'My List'}</span>`;
+                }
+                lucide.createIcons();
+            },
+
+            async openDetail(id) {
+                this.lastFocusedCard = document.activeElement; 
+                this.currentDetailId = id;
+                const workout = await DB.getWorkout(id);
+                
+                document.getElementById('detail-title').innerText = workout.title;
+                document.getElementById('detail-level').innerText = workout.level;
+                document.getElementById('detail-type').innerText = workout.type;
+                document.getElementById('detail-time').innerText = workout.time;
+                document.getElementById('detail-kcal').innerText = workout.kcal;
+                document.getElementById('detail-desc').innerText = workout.description;
+                document.getElementById('detail-ex-count').innerText = workout.exercises ? workout.exercises.length : 0;
+                
+                if(workout.exercises && workout.exercises.length > 0) {
+                    document.getElementById('detail-exercises').innerHTML = workout.exercises.map((ex, index) => 
+                        `<button onclick="UI.playPreview('${ex.vid}')" onfocus="UI.playPreview('${ex.vid}')" class="tv-focusable flex items-center justify-between p-4 rounded-2xl bg-app-surface/60 border border-app-border hover:bg-app-surface focus:bg-app-cyan/20 focus:border-app-cyan group text-left transition-colors"><div class="flex items-center gap-4"><div class="w-10 h-10 rounded-full bg-app-bg flex items-center justify-center text-slate-400 group-focus:text-app-cyan group-focus:bg-app-bg/80 font-bold font-display transition-colors">${index + 1}</div><div><h4 class="font-bold text-white group-focus:text-app-cyan mb-1 transition-colors">${ex.name}</h4><p class="text-xs text-slate-400 font-semibold tracking-wider">${ex.sets} SETS • ${ex.reps}</p></div></div><i data-lucide="play-circle" class="w-6 h-6 text-slate-500 group-focus:text-app-cyan opacity-50 group-focus:opacity-100 transition-all"></i></button>`
+                    ).join('');
+                    this.playPreview(workout.exercises[0].vid);
+                } else {
+                    document.getElementById('detail-exercises').innerHTML = `<p class="text-slate-500 px-6">Exercises not available in this demo.</p>`;
+                }
+
+                this.updateListButtons(id, DB.isSaved(id));
+                lucide.createIcons();
+                this.switchView('detail-view');
+                setTimeout(() => document.getElementById('detail-start-btn').focus({ preventScroll: true }), 100);
+            },
+
+            closeDetail() {
+                document.getElementById('exercise-video').pause();
+                const prev = this.historyStack.pop() || 'dashboard-view';
+                this.switchView(prev, true);
+                setTimeout(() => (this.lastFocusedCard || document.getElementById(this.currentViewId).querySelector('.tv-focusable')).focus(), 100);
+            },
+
+            playPreview(vidUrl) {
+                const videoEl = document.getElementById('exercise-video');
+                if(!videoEl.src.includes(vidUrl)) {
+                    videoEl.src = vidUrl;
+                    videoEl.play().catch(e => console.log("Auto-play restricted", e));
+                }
+            },
+
+            renderDashboardSkeletons() {
+                const container = document.getElementById('dynamic-workout-rows');
+                let html = '';
+                for(let i=0; i<2; i++) {
+                    html += `<div class="mb-10"><div class="w-48 h-8 rounded-lg skeleton-load mb-4"></div><div class="flex gap-6 overflow-hidden py-2 px-4 -mx-4">`;
+                    for(let j=0; j<4; j++) html += `<div class="shrink-0 w-[360px] h-[280px] rounded-[2rem] skeleton-load"></div>`;
+                    html += `</div></div>`;
+                }
+                container.innerHTML = html;
+            },
+
+            async loadDashboardData() {
+                const catalog = await DB.getCatalog();
+                
+                // Dynamically extract categories from the JSON data, filtering out the hero category
+                const categories = [...new Set(catalog.map(item => item.type))].filter(c => c !== "Power & Output");
+                const container = document.getElementById('dynamic-workout-rows');
+                let htmlContent = '';
+                
+                categories.forEach(category => {
+                    const workouts = catalog.filter(w => w.type === category);
+                    if (workouts.length > 0) {
+                        htmlContent += `<div class="mb-10"><h2 class="font-display text-2xl font-bold text-white tracking-tight uppercase mb-2 px-2">${category}</h2><div class="flex gap-6 overflow-x-auto scrollbar-hide py-6 px-4 -mx-4">`;
+                        htmlContent += workouts.map(item => this.createCardHTML(item)).join('');
+                        htmlContent += `</div></div>`;
+                    }
+                });
+                container.innerHTML = htmlContent;
+                lucide.createIcons();
+            },
+
+            createCardHTML(item) {
+                return `<button onclick="UI.openDetail('${item.id}')" class="tv-focusable shrink-0 w-[360px] bg-app-surface rounded-[2rem] overflow-hidden border border-app-border text-left group transition-transform"><div class="relative h-48 w-full overflow-hidden"><img src="${item.img}" alt="${item.title}" class="w-full h-full object-cover opacity-70 group-focus:opacity-100 group-hover:opacity-100 group-focus:scale-105 transition-all duration-500 grayscale-[0.2]"><div class="absolute inset-0 bg-gradient-to-t from-app-surface to-transparent opacity-80 pointer-events-none"></div><div class="absolute top-4 right-4 bg-app-bg/80 backdrop-blur-md text-app-cyan text-[9px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider border border-app-cyan/20 shadow-lg">${item.level}</div></div><div class="p-6 pt-2"><h4 class="font-display text-white font-bold text-lg mb-3 uppercase tracking-wide truncate">${item.title}</h4><div class="flex items-center gap-5 text-slate-400 text-xs font-semibold tracking-wide"><span class="flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5 text-slate-500"></i> ${item.time} min</span><span class="flex items-center gap-1.5"><i data-lucide="flame" class="w-3.5 h-3.5 text-app-cyan"></i> ${item.kcal} kcal</span></div></div></button>`;
+            },
+
+            setupSpatialNav() {
+                document.addEventListener('keydown', (e) => {
+                    const isOverlay = ['connect-view', 'workout-view'].includes(this.currentViewId);
+                    const isPaused = Engine.isPaused;
+                    
+                    const focusables = Array.from(document.querySelectorAll('.tv-focusable')).filter(el => {
+                        if (el.closest('.view-hidden')) return false; 
+                        if (isPaused) { if (!el.closest('#pause-menu-overlay')) return false; } 
+                        else { if (el.closest('#pause-menu-overlay')) return false; if (isOverlay && !el.closest(`#${this.currentViewId}`)) return false; }
+                        const rect = el.getBoundingClientRect();
+                        return rect.width > 0 && rect.height > 0;
+                    });
+                    
+                    if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter'].includes(e.key)) return;
+                    if (e.key === 'Enter') {
+                        e.preventDefault(); 
+                        if (document.activeElement?.classList.contains('tv-focusable')) document.activeElement.click();
+                        return;
+                    }
+                    e.preventDefault(); 
+                    
+                    const currentEl = document.activeElement;
+                    if (!currentEl?.classList.contains('tv-focusable')) { if (focusables.length > 0) focusables[0].focus(); return; }
+                    
+                    const cR = currentEl.getBoundingClientRect();
+                    const cC = { x: cR.left + cR.width / 2, y: cR.top + cR.height / 2 };
+                    
+                    let bestMatch = null; 
+                    let minDistance = Infinity;
+                    
+                    focusables.forEach(el => {
+                        if (el === currentEl) return;
+                        const r = el.getBoundingClientRect();
+                        const c = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+                        
+                        // Calculate differences
+                        let dx = c.x - cC.x; 
+                        let dy = c.y - cC.y;
+                        
+                        // Calculate Overlaps for fine-tuning
+                        const overlapX = Math.max(0, Math.min(r.right, cR.right) - Math.max(r.left, cR.left));
+                        const overlapY = Math.max(0, Math.min(r.bottom, cR.bottom) - Math.max(r.top, cR.top));
+                        
+                        let isValid = false;
+                        let dist = Infinity;
+
+                        // Calculate angle to determine strict directional cones (-180 to 180 degrees)
+                        const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+                        const absAngle = Math.abs(angle);
+                        
+                        // Sector Logic: We restrict direction finding to logical cones so Down doesn't jump sideways
+                        if (e.key === 'ArrowRight' && dx > 0) {
+                            if (absAngle < 60) { isValid = true; dist = dx + Math.abs(dy) * 4; }
+                            if (overlapY > 0) { isValid = true; dist = dx + Math.abs(dy) * 1.5; }
+                        } 
+                        else if (e.key === 'ArrowLeft' && dx < 0) {
+                            if (absAngle > 120) { isValid = true; dist = -dx + Math.abs(dy) * 4; }
+                            if (overlapY > 0) { isValid = true; dist = -dx + Math.abs(dy) * 1.5; }
+                        } 
+                        else if (e.key === 'ArrowDown' && dy > 0) {
+                            // Must be within a 120-degree cone pointing down
+                            if (angle > 30 && angle < 150) { isValid = true; dist = dy + Math.abs(dx) * 4; }
+                            // Fallback if they perfectly overlap horizontally
+                            if (overlapX > 0) { isValid = true; dist = dy + Math.abs(dx) * 1.5; }
+                        } 
+                        else if (e.key === 'ArrowUp' && dy < 0) {
+                            if (angle > -150 && angle < -30) { isValid = true; dist = -dy + Math.abs(dx) * 4; }
+                            if (overlapX > 0) { isValid = true; dist = -dy + Math.abs(dx) * 1.5; }
+                        }
+                        
+                        if (isValid && dist < minDistance) {
+                            minDistance = dist; 
+                            bestMatch = el; 
+                        }
+                    });
+                    
+                    if (bestMatch) {
+                        bestMatch.focus();
+                        bestMatch.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+                    }
+                });
+            }
+        };
+
+        /* =========================================================================
+           3. WORKOUT ENGINE & CONNECTION SIMULATOR
+           ========================================================================= */
+        const Engine = {
+            syncUnsubscribe: null,
+            callerCandUnsub: null,
+            pc: null,
+            remoteStream: null, // Store the live camera stream from the phone
+            timerInterval: null,
+            feedbackInterval: null,
+            isPaused: false,
+            workoutData: null,
+            exIndex: 0,
+            seconds: 0,
+            
+            async startWorkoutConnection() {
+                if(!UI.currentDetailId || UI.currentDetailId !== 'demo') {
+                    UI.showToast("Only the featured demo contains actual workout data.", "alert-circle");
+                    return;
+                }
+                
+                this.workoutData = await DB.getWorkout(UI.currentDetailId);
+                UI.switchView('connect-view');
+                
+                const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+                const code = Array.from({length:6}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+                document.getElementById('pin-display').innerText = `${code.substring(0,3)} ${code.substring(3,6)}`;
+                
+                document.getElementById('qr-code-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://couchcoach.tv/link/${code}`;
+                setTimeout(() => { document.getElementById('qr-code-img').classList.remove('opacity-0'); }, 300);
+
+                document.getElementById('sync-status-text').innerText = "Waiting for mobile sync...";
+                document.getElementById('sync-status-text').className = 'text-app-cyan text-sm lg:text-base font-bold tracking-widest uppercase';
+                document.getElementById('sync-loader').style.display = 'flex';
+                
+                if (!db || !auth.currentUser) {
+                    UI.showToast("Database not configured. Using fake timer.", "alert-triangle");
+                    setTimeout(() => {
+                        document.getElementById('sync-status-text').innerText = "Camera Connected! (Mock)";
+                        document.getElementById('sync-status-text').className = 'text-green-400 text-sm lg:text-base font-bold tracking-widest uppercase';
+                        document.getElementById('sync-loader').style.display = 'none';
+                        setTimeout(() => this.beginSession(), 1000);
+                    }, 4000);
+                    return;
+                }
+
+                try {
+                    const sessionRef = doc(db, 'artifacts', appId, 'public', 'data', 'sessions', code);
+                    await setDoc(sessionRef, { status: 'waiting', createdAt: new Date() });
+                    
+                    if (this.syncUnsubscribe) this.syncUnsubscribe();
+                    
+                    this.syncUnsubscribe = onSnapshot(sessionRef, async (docSnap) => {
+                        const data = docSnap.data();
+                        if (!data || !data.offer || data.status !== 'connected' || this.pc) return;
+                        
+                        console.log("TV: Phone offer received, starting WebRTC handshake");
+                        document.getElementById('sync-status-text').innerText = "Establishing video link...";
+
+                        const rtcConfig = { iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] };
+                        this.pc = new RTCPeerConnection(rtcConfig);
+
+                        // Track connection state for debugging and UI feedback
+                        this.pc.onconnectionstatechange = () => {
+                            console.log("TV: WebRTC connection state:", this.pc.connectionState);
+                            if (this.pc.connectionState === 'connected') {
+                                console.log("TV: Peer connection fully established");
+                            }
+                            if (this.pc.connectionState === 'failed') {
+                                console.error("TV: WebRTC connection failed");
+                                UI.showToast("Camera connection failed. Try again.", "alert-circle");
+                            }
+                        };
+
+                        this.pc.oniceconnectionstatechange = () => {
+                            console.log("TV: ICE connection state:", this.pc.iceConnectionState);
+                        };
+
+                        // When the TV receives the video track from the phone
+                        this.pc.ontrack = (event) => {
+                            console.log("TV: Received remote track:", event.track.kind);
+                            if (event.streams && event.streams[0]) {
+                                this.remoteStream = event.streams[0];
+                                console.log("TV: Remote stream ready, tracks:", this.remoteStream.getTracks().length);
+                                
+                                // Update connect-view status to show success
+                                document.getElementById('sync-status-text').innerText = "Camera Connected!";
+                                document.getElementById('sync-status-text').className = 'text-green-400 text-sm lg:text-base font-bold tracking-widest uppercase';
+                                document.getElementById('sync-loader').style.display = 'none';
+                                
+                                // Now that we actually have the stream, start the workout
+                                setTimeout(() => this.beginSession(), 800);
+                            }
+                        };
+
+                        // Send our ICE candidates to Firestore
+                        const calleeCandidatesCollection = collection(sessionRef, 'calleeCandidates');
+                        this.pc.onicecandidate = event => {
+                            if (event.candidate) {
+                                addDoc(calleeCandidatesCollection, event.candidate.toJSON());
+                            }
+                        };
+
+                        // Set the phone's offer as remote description
+                        await this.pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+
+                        // Create and send our answer
+                        const answerDescription = await this.pc.createAnswer();
+                        await this.pc.setLocalDescription(answerDescription);
+                        await updateDoc(sessionRef, { 
+                            answer: { type: answerDescription.type, sdp: answerDescription.sdp } 
+                        });
+                        console.log("TV: Answer sent to Firestore");
+
+                        // Listen for the phone's ICE candidates
+                        const callerCandidatesCollection = collection(sessionRef, 'callerCandidates');
+                        this.callerCandUnsub = onSnapshot(callerCandidatesCollection, (snapshot) => {
+                            snapshot.docChanges().forEach((change) => {
+                                if (change.type === 'added') {
+                                    const candidateData = change.doc.data();
+                                    this.pc.addIceCandidate(new RTCIceCandidate(candidateData))
+                                        .catch(e => console.error("TV: Error adding ICE candidate:", e));
+                                }
+                            });
+                        });
+
+                    }, (error) => {
+                        console.error("Firestore sync error:", error);
+                    });
+                } catch(e) {
+                    console.error("Error setting up sync:", e);
+                    UI.showToast("Sync setup failed. Check console.", "alert-circle");
+                }
+            },
+
+            cancelConnection() {
+                if (this.syncUnsubscribe) this.syncUnsubscribe();
+                if (this.callerCandUnsub) this.callerCandUnsub();
+                if (this.pc) { this.pc.close(); this.pc = null; }
+                this.remoteStream = null;
+                UI.switchView('detail-view', true);
+            },
+
+            beginSession() {
+                this.exIndex = 0;
+                this.seconds = 0;
+                this.isPaused = false;
+                this.loadExerciseUI();
+                UI.switchView('workout-view');
+                document.getElementById('pro-demo-video-main').play();
+                
+                // Attach the live camera stream to the PiP video element
+                const pipVideo = document.getElementById('user-camera-pip');
+                const noCameraOverlay = document.getElementById('pip-no-camera');
+                const liveBadge = document.getElementById('pip-live-badge');
+                
+                if (this.remoteStream && this.remoteStream.active) {
+                    pipVideo.srcObject = this.remoteStream;
+                    pipVideo.play().catch(e => console.error("PiP play failed:", e));
+                    noCameraOverlay.classList.add('hidden');
+                    liveBadge.classList.remove('hidden');
+                    console.log("TV: Live camera feed attached to PiP");
+                } else {
+                    // No camera stream available (mock mode)
+                    noCameraOverlay.classList.remove('hidden');
+                    liveBadge.classList.add('hidden');
+                }
+                
+                this.startTimer();
+                this.triggerSimulatedAI();
+                setTimeout(() => document.getElementById('workout-pause-btn').focus(), 100);
+            },
+
+            loadExerciseUI() {
+                if(!this.workoutData || !this.workoutData.exercises[this.exIndex]) return;
+                const ex = this.workoutData.exercises[this.exIndex];
+                
+                document.getElementById('hud-ex-title').innerText = ex.name;
+                document.getElementById('hud-ex-current').innerText = this.exIndex + 1;
+                document.getElementById('hud-ex-total').innerText = this.workoutData.exercises.length;
+                
+                if (this.exIndex + 1 < this.workoutData.exercises.length) {
+                    document.getElementById('hud-next-wrapper').style.display = 'inline-flex';
+                    document.getElementById('hud-next-ex').innerText = this.workoutData.exercises[this.exIndex+1].name;
+                } else {
+                    document.getElementById('hud-next-wrapper').style.display = 'none';
+                }
+
+                document.getElementById('hud-sets').innerText = ex.sets;
+                
+                // Reps vs Time display
+                if(ex.reps.includes('s')) {
+                    document.getElementById('hud-center-label').innerText = "TIME REMAINING";
+                    document.getElementById('hud-center-val').innerText = ex.reps.replace('s','');
+                    document.getElementById('hud-center-sub').innerText = 's';
+                } else {
+                    document.getElementById('hud-center-label').innerText = "REP COUNT";
+                    document.getElementById('hud-center-val').innerText = "0";
+                    document.getElementById('hud-center-sub').innerText = `/ ${ex.reps.split('-').pop()}`; // take upper range
+                }
+            },
+
+            startTimer() {
+                clearInterval(this.timerInterval);
+                this.timerInterval = setInterval(() => {
+                    if(!this.isPaused) {
+                        this.seconds++;
+                        // If it's a rep exercise, simulate rep counting based on time
+                        const ex = this.workoutData.exercises[this.exIndex];
+                        if(!ex.reps.includes('s')) {
+                            const target = parseInt(ex.reps.split('-').pop());
+                            const currentRep = Math.floor(this.seconds / 3); // 1 rep every 3 seconds
+                            if(currentRep <= target) {
+                                document.getElementById('hud-center-val').innerText = currentRep;
+                            }
+                        } else {
+                            // If it's a time exercise, countdown
+                            const target = parseInt(ex.reps.replace('s',''));
+                            const rem = Math.max(0, target - this.seconds);
+                            document.getElementById('hud-center-val').innerText = rem;
+                        }
+                    }
+                }, 1000);
+            },
+
+            triggerSimulatedAI() {
+                clearInterval(this.feedbackInterval);
+                const events = [
+                    { t: 2, m: "Ready to begin?", type: "info" },
+                    { t: 8, m: "Great pace, keep it up!", type: "info" },
+                    { t: 15, m: "Slow down your descent", type: "warning" },
+                    { t: 22, m: "Perfect form detected", type: "info" },
+                ];
+                
+                this.feedbackInterval = setInterval(() => {
+                    if(this.isPaused) return;
+                    const event = events.find(e => e.t === this.seconds);
+                    if(event) this.showAIPill(event.m, event.type);
+                }, 1000);
+            },
+
+            showAIPill(text, type) {
+                const pill = document.getElementById('ai-feedback-pill');
+                const icon = document.getElementById('ai-feedback-icon');
+                
+                pill.classList.remove('opacity-0', 'animate-feedback');
+                void pill.offsetWidth; 
+                
+                document.getElementById('ai-feedback-text').innerText = text;
+                if(type === 'error') {
+                    pill.className = "bg-red-500 text-white px-12 py-5 rounded-full shadow-[0_20px_50px_rgba(239,68,68,0.4)] flex items-center gap-5 border-2 border-white/20 animate-feedback";
+                    icon.setAttribute('data-lucide', 'alert-circle');
+                } else if (type === 'warning') {
+                    pill.className = "bg-amber-400 text-app-bg px-12 py-5 rounded-full shadow-2xl flex items-center gap-5 border-2 border-white/20 animate-feedback";
+                    icon.setAttribute('data-lucide', 'alert-triangle');
+                } else {
+                    pill.className = "bg-app-cyan text-app-bg px-12 py-5 rounded-full shadow-2xl flex items-center gap-5 border-2 border-white/20 animate-feedback";
+                    icon.setAttribute('data-lucide', 'zap');
+                }
+                lucide.createIcons();
+                
+                setTimeout(() => { pill.classList.add('opacity-0'); }, 4000);
+            },
+
+            openPauseMenu() {
+                this.isPaused = true;
+                document.getElementById('pro-demo-video-main').pause();
+                // Don't pause the live camera feed — it should keep streaming
+                document.getElementById('pause-menu-overlay').classList.replace('opacity-0', 'opacity-100');
+                document.getElementById('pause-menu-overlay').classList.replace('pointer-events-none', 'pointer-events-auto');
+                setTimeout(() => document.getElementById('resume-workout-btn').focus(), 100);
+            },
+
+            resumeWorkout() {
+                this.isPaused = false;
+                document.getElementById('pro-demo-video-main').play();
+                document.getElementById('pause-menu-overlay').classList.replace('opacity-100', 'opacity-0');
+                document.getElementById('pause-menu-overlay').classList.replace('pointer-events-auto', 'pointer-events-none');
+                setTimeout(() => document.getElementById('workout-pause-btn').focus(), 100);
+            },
+
+            skipExercise() {
+                if(this.exIndex + 1 < this.workoutData.exercises.length) {
+                    this.exIndex++;
+                    this.seconds = 0;
+                    this.loadExerciseUI();
+                    this.triggerSimulatedAI();
+                    UI.showToast("Skipped to next exercise", "skip-forward");
+                    this.resumeWorkout();
+                } else {
+                    this.exitWorkout();
+                }
+            },
+
+            cleanup() {
+                clearInterval(this.timerInterval);
+                clearInterval(this.feedbackInterval);
+                if (this.syncUnsubscribe) this.syncUnsubscribe();
+                if (this.callerCandUnsub) this.callerCandUnsub();
+                
+                const pipVideo = document.getElementById('user-camera-pip');
+
+                if (this.pc) {
+                    this.pc.close();
+                    this.pc = null;
+                }
+                
+                // Detach the live stream and reset PiP state
+                pipVideo.srcObject = null;
+                this.remoteStream = null;
+                document.getElementById('pip-no-camera').classList.remove('hidden');
+                document.getElementById('pip-live-badge').classList.add('hidden');
+
+                document.getElementById('pro-demo-video-main').pause();
+                pipVideo.pause();
+                this.isPaused = false;
+                document.getElementById('pause-menu-overlay').classList.replace('opacity-100', 'opacity-0');
+                document.getElementById('pause-menu-overlay').classList.replace('pointer-events-auto', 'pointer-events-none');
+            },
+
+            exitWorkout() {
+                this.cleanup();
+                UI.switchView('detail-view', true);
+                setTimeout(() => document.getElementById('detail-start-btn').focus({ preventScroll: true }), 100);
+            }
+        };
+
+        // Export logic to global scope so inline event handlers (onclick="") continue to work 
+        // now that this script block is type="module"
+        window.UI = UI;
+        window.Engine = Engine;
+        window.DB = DB;
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => UI.init());
+    </script>
 </body>
 </html>

@@ -1,737 +1,343 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>CouchCoach</title>
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.3/dist/pose-detection.min.js"></script>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --bg:#09090b;--sf:#111113;--bd:#1c1c1e;
-  --tx:#e4e4e7;--dm:#52525b;
-  --g:#4ade80;--y:#facc15;--r:#f87171;
-  --mn:'SF Mono','Fira Code','Consolas',monospace;
-}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-  background:var(--bg);color:var(--tx);height:100dvh;overflow:hidden}
-.s{display:none;flex-direction:column;height:100dvh}.s.on{display:flex}
-
-/* PAIR */
-.pair{align-items:center;justify-content:center;padding:32px 24px;gap:28px;text-align:center}
-.p-logo{font-family:var(--mn);font-size:15px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:var(--g)}
-.p-title{font-size:20px;font-weight:600}
-.p-sub{color:var(--dm);font-size:13px;line-height:1.5;max-width:260px}
-.code-row{display:flex;gap:8px}
-.ci{width:44px;height:54px;text-align:center;background:var(--sf);border:1px solid var(--bd);
-  border-radius:10px;color:var(--tx);font-family:var(--mn);font-size:22px;font-weight:700;
-  outline:none;transition:border-color .2s;-webkit-appearance:none}
-.ci:focus{border-color:var(--g)}
-.p-err{color:var(--r);font-size:12px;min-height:16px}
-.p-btn{width:100%;max-width:300px;padding:15px;background:var(--g);color:#09090b;border:none;
-  border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;letter-spacing:.5px;transition:all .2s}
-.p-btn:disabled{opacity:.25;cursor:not-allowed}
-.p-btn:active:not(:disabled){transform:scale(.97)}
-
-/* WORKOUT */
-.wk-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px}
-.wk-logo{font-family:var(--mn);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--g)}
-.wk-status{font-family:var(--mn);font-size:10px;color:var(--dm)}
-
-.cam-wrap{flex:1;position:relative;overflow:hidden;border-radius:14px;margin:0 10px}
-#cam{width:100%;height:100%;object-fit:cover;border-radius:14px;transform:scaleX(-1)}
-#poseCanvas{position:absolute;top:0;left:0;width:100%;height:100%;border-radius:14px;pointer-events:none}
-#captureCanvas{display:none}
-
-/* Silhouette overlay */
-.silhouette-overlay{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;
-  display:flex;align-items:center;justify-content:center;border-radius:14px}
-.sil-msg{position:absolute;bottom:20px;left:16px;right:16px;text-align:center;
-  background:rgba(9,9,11,.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-  border:1px solid var(--bd);border-radius:10px;padding:12px;font-size:13px;font-weight:500}
-.sil-msg.ready{color:var(--g);border-color:var(--g)}
-
-/* Feedback toast */
-.toast{position:absolute;top:16px;left:14px;right:14px;
-  background:rgba(9,9,11,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  border:1px solid var(--bd);border-radius:12px;padding:12px 14px;
-  transform:translateY(-130%);transition:transform .4s cubic-bezier(.16,1,.3,1);z-index:5}
-.toast.vis{transform:translateY(0)}
-.toast-t{font-size:13px;line-height:1.3;font-weight:500}
-.toast-m{font-family:var(--mn);font-size:10px;color:var(--dm);margin-top:4px}
-
-/* Angle display */
-.angle-badge{position:absolute;bottom:60px;left:14px;
-  background:rgba(9,9,11,.8);border:1px solid var(--bd);border-radius:8px;
-  padding:6px 10px;font-family:var(--mn);font-size:11px;color:var(--dm)}
-
-.ctrl{padding:12px 16px 20px;display:flex;flex-direction:column;gap:10px}
-.stats{display:flex;justify-content:space-around;padding-bottom:4px}
-.st{text-align:center}
-.st-v{font-family:var(--mn);font-size:22px;font-weight:700}
-.st-l{font-size:9px;color:var(--dm);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
-.ex-row{display:flex;gap:6px}
-.ex{flex:1;padding:9px;background:var(--sf);border:1px solid var(--bd);border-radius:9px;
-  color:var(--dm);font-family:var(--mn);font-size:11px;text-align:center;cursor:pointer;transition:all .2s}
-.ex.sel{color:var(--g);border-color:var(--g);background:rgba(74,222,128,.06)}
-.act{width:100%;padding:15px;border:none;border-radius:12px;font-size:15px;font-weight:600;
-  cursor:pointer;transition:all .2s;letter-spacing:.5px}
-.act.go{background:var(--g);color:#09090b}
-.act.stop{background:var(--r);color:#fff}
-.act:active{transform:scale(.97)}
-
-/* Loading */
-.loader{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(9,9,11,.9);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
-  border-radius:14px;z-index:10}
-.loader-spin{width:28px;height:28px;border:3px solid var(--bd);border-top-color:var(--g);
-  border-radius:50%;animation:sp .7s linear infinite}
-@keyframes sp{to{transform:rotate(360deg)}}
-.loader-txt{font-size:13px;color:var(--dm)}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CouchCoach - Mobile Sync</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.3/dist/pose-detection.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], display: ['Montserrat', 'sans-serif'] }, colors: { app: { bg: '#080f14', surface: '#101f27', border: '#1a2e3a', cyan: '#42d5e6' } } } }
+        }
+    </script>
 </head>
-<body>
+<body class="bg-app-bg text-white font-sans h-screen flex flex-col items-center justify-center p-6 overflow-hidden relative">
+    
+    <!-- State 1: Enter PIN -->
+    <div id="sync-view" class="w-full max-w-sm flex flex-col items-center transition-opacity duration-500 z-10">
+        <div class="mb-10 flex flex-col items-center">
+            <span class="font-display font-black text-3xl tracking-tighter flex flex-col items-center leading-[0.9]">
+                <span>Couch</span><span class="text-app-cyan">Coach</span>
+            </span>
+            <span class="text-app-cyan font-bold tracking-widest text-[10px] uppercase mt-2 border border-app-cyan/30 px-3 py-1 rounded-full">Mobile Sync</span>
+        </div>
 
-<!-- PAIR -->
-<div id="pairS" class="s pair on">
-  <div class="p-logo">CouchCoach</div>
-  <div class="p-title">Connect to your TV</div>
-  <div class="p-sub">Enter the 6-digit code shown on your Fire TV</div>
-  <div class="code-row" id="codeRow">
-    <input class="ci" type="tel" maxlength="1" inputmode="numeric" autocomplete="off">
-    <input class="ci" type="tel" maxlength="1" inputmode="numeric" autocomplete="off">
-    <input class="ci" type="tel" maxlength="1" inputmode="numeric" autocomplete="off">
-    <input class="ci" type="tel" maxlength="1" inputmode="numeric" autocomplete="off">
-    <input class="ci" type="tel" maxlength="1" inputmode="numeric" autocomplete="off">
-    <input class="ci" type="tel" maxlength="1" inputmode="numeric" autocomplete="off">
-  </div>
-  <div class="p-err" id="pErr"></div>
-  <button class="p-btn" id="pBtn" disabled onclick="doPair()">Connect</button>
-</div>
+        <h1 class="font-display text-3xl font-black mb-2 text-center">Connect Camera</h1>
+        <p class="text-slate-400 text-center text-sm mb-8">Enter the 6-character PIN displayed on your TV screen.</p>
 
-<!-- WORKOUT -->
-<div id="wkS" class="s">
-  <div class="wk-head">
-    <div class="wk-logo">CouchCoach</div>
-    <div class="wk-status" id="wkStatus">Loading pose model…</div>
-  </div>
-  <div class="cam-wrap">
-    <video id="cam" autoplay playsinline muted></video>
-    <canvas id="poseCanvas"></canvas>
-    <canvas id="captureCanvas"></canvas>
-    <div class="silhouette-overlay" id="silOverlay">
-      <div class="sil-msg" id="silMsg">Position yourself in frame</div>
+        <input type="text" id="pin-input" maxlength="6" placeholder="------" class="bg-app-surface border-2 border-app-border text-white text-center font-display font-black text-4xl tracking-[0.5em] rounded-2xl w-full py-6 focus:outline-none focus:border-app-cyan uppercase transition-colors mb-6 shadow-inner">
+        
+        <button onclick="syncToTV()" id="sync-btn" class="bg-app-cyan text-slate-900 w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 hover:bg-white transition-colors active:scale-95 shadow-[0_0_20px_rgba(66,213,230,0.2)]">
+            <i data-lucide="cast" class="w-5 h-5"></i> Sync with TV
+        </button>
     </div>
-    <div class="toast" id="toast">
-      <div class="toast-t" id="toastT"></div>
-      <div class="toast-m" id="toastM"></div>
+
+    <!-- State 2: Camera Active -->
+    <div id="active-view" class="hidden absolute inset-0 w-full h-full flex-col items-center text-center bg-black">
+        <video id="phone-camera" autoplay playsinline muted class="w-full h-full object-cover transform scale-x-[-1]"></video>
+        <canvas id="poseCanvas" class="absolute inset-0 w-full h-full" style="transform: scaleX(-1); pointer-events: none;"></canvas>
+        
+        <div id="sync-status-bar" class="absolute bottom-12 bg-app-surface/80 backdrop-blur-xl px-8 py-4 rounded-full border border-app-cyan/50 flex items-center gap-4 shadow-2xl">
+            <div id="sync-dot" class="w-3 h-3 bg-amber-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(251,191,36,0.8)]"></div>
+            <span id="sync-bar-text" class="font-bold tracking-widest uppercase text-sm text-amber-400">Connecting to TV...</span>
+        </div>
     </div>
-    <div class="angle-badge" id="angleBadge" style="display:none"></div>
-    <div class="loader" id="loader">
-      <div class="loader-spin"></div>
-      <div class="loader-txt">Loading pose detection…</div>
-    </div>
-  </div>
-  <div class="ctrl">
-    <div class="stats">
-      <div class="st"><div class="st-v" id="reps">0</div><div class="st-l">Reps</div></div>
-      <div class="st"><div class="st-v" id="score">—</div><div class="st-l">Form</div></div>
-      <div class="st"><div class="st-v" id="timer">0:00</div><div class="st-l">Time</div></div>
-    </div>
-    <div class="ex-row">
-      <div class="ex sel" onclick="pickEx(this)" data-e="pushup">Pushup</div>
-      <div class="ex" onclick="pickEx(this)" data-e="squat">Squat</div>
-      <div class="ex" onclick="pickEx(this)" data-e="plank">Plank</div>
-      <div class="ex" onclick="pickEx(this)" data-e="lunge">Lunge</div>
-    </div>
-    <button class="act go" id="actBtn" onclick="toggle()">Start Workout</button>
-  </div>
-</div>
 
-<script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, updateDoc, collection, addDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-// ══════════════════════════════════════
-// CONFIG
-// ══════════════════════════════════════
-const API = location.origin;
-let sid = null, ex = 'pushup', on = false, tmInt = null, t0 = 0;
-let detector = null, rafId = null;
-let repCount = 0, repPhase = 'up';
-let bedrockBusy = false, lastPose = null;
-let repData = { snapshots: [], issues: [], hadBadForm: false };
-let lastFormCheckTime = 0;
-let angleHistory = [];
-let failedRepCooldown = 0;
-let silLockStart = 0; // timestamp when all points first locked
-let autoStarting = false;
+        const firebaseConfig = {
+            apiKey: "AIzaSyAYhPAn11OkDpfzUrPgWgV9r47qJU6721M",
+            authDomain: "couchcoachhackathon.firebaseapp.com",
+            projectId: "couchcoachhackathon",
+            storageBucket: "couchcoachhackathon.firebasestorage.app",
+            messagingSenderId: "407445984088",
+            appId: "1:407445984088:web:7bfc1cc7e6905bc94e8b2d",
+            measurementId: "G-F1JP8W3Y7T"
+        };
 
-const KP = {
-    NOSE:0, L_EYE:1, R_EYE:2, L_EAR:3, R_EAR:4,
-    L_SHOULDER:5, R_SHOULDER:6, L_ELBOW:7, R_ELBOW:8,
-    L_WRIST:9, R_WRIST:10, L_HIP:11, R_HIP:12,
-    L_KNEE:13, R_KNEE:14, L_ANKLE:15, R_ANKLE:16
-};
-
-const SKELETON = [
-    [KP.L_SHOULDER, KP.R_SHOULDER],
-    [KP.L_SHOULDER, KP.L_ELBOW], [KP.L_ELBOW, KP.L_WRIST],
-    [KP.R_SHOULDER, KP.R_ELBOW], [KP.R_ELBOW, KP.R_WRIST],
-    [KP.L_SHOULDER, KP.L_HIP], [KP.R_SHOULDER, KP.R_HIP],
-    [KP.L_HIP, KP.R_HIP],
-    [KP.L_HIP, KP.L_KNEE], [KP.L_KNEE, KP.L_ANKLE],
-    [KP.R_HIP, KP.R_KNEE], [KP.R_KNEE, KP.R_ANKLE],
-];
-
-// Exercise configs: what angle to track, thresholds, form rules
-const EX_CONFIG = {
-    pushup: {
-        trackJoint: 'l_elbow', downThresh: 100, upThresh: 150,
-        // Body must be roughly horizontal for pushup to count
-        positionValid: (p) => {
-            // Shoulders and hips should be at similar Y height (horizontal body)
-            // If shoulder_y is much less than hip_y, person is upright/standing
-            if (p.l_shoulder_y && p.l_hip_y) {
-                const diff = Math.abs(p.l_shoulder_y - p.l_hip_y);
-                // In a pushup, shoulder and hip are within 20% of frame height
-                // Standing: shoulder is way above hip (diff > 0.25)
-                if (diff > 0.25) return false;
-            }
-            return true;
-        },
-        formChecks: (a, p) => {
-            const issues = [];
-            if (a.l_hip !== null && a.l_hip < 150) issues.push('hip_sag');
-            if (a.l_hip !== null && a.l_hip > 185) issues.push('hip_pike');
-            if (a.l_shoulder !== null && a.l_shoulder > 80) issues.push('elbows_flaring');
-            if (a.l_elbow !== null && a.r_elbow !== null && Math.abs(a.l_elbow - a.r_elbow) > 20) issues.push('asymmetric_arms');
-            return issues;
-        },
-        angleBadge: (a) => ({ val: a.l_elbow, label: 'Elbow' }),
-    },
-    squat: {
-        trackJoint: 'l_knee', downThresh: 100, upThresh: 155,
-        // Squats: person should be upright (shoulders above hips)
-        positionValid: (p) => {
-            if (p.l_shoulder_y && p.l_hip_y) {
-                // Shoulders should be above hips (lower Y value)
-                if (p.l_shoulder_y > p.l_hip_y) return false;
-            }
-            return true;
-        },
-        formChecks: (a, p) => {
-            const issues = [];
-            if (a.l_hip !== null && a.l_knee !== null && a.l_hip < 60 && a.l_knee < 110) issues.push('forward_lean');
-            if (a.l_knee !== null && a.r_knee !== null && Math.abs(a.l_knee - a.r_knee) > 15) issues.push('asymmetric_knees');
-            if (p.l_knee_x && p.r_knee_x && p.l_hip_x && p.r_hip_x) {
-                const kw = Math.abs(p.l_knee_x - p.r_knee_x);
-                const hw = Math.abs(p.l_hip_x - p.r_hip_x);
-                if (kw < hw * 0.7) issues.push('knees_caving');
-            }
-            if (a.l_hip !== null && a.l_hip < 80 && (a.l_knee === null || a.l_knee > 130)) issues.push('torso_lean');
-            return issues;
-        },
-        angleBadge: (a) => ({ val: a.l_knee, label: 'Knee' }),
-    },
-    lunge: {
-        trackJoint: 'l_knee', downThresh: 100, upThresh: 155,
-        positionValid: (p) => {
-            if (p.l_shoulder_y && p.l_hip_y) {
-                if (p.l_shoulder_y > p.l_hip_y) return false;
-            }
-            return true;
-        },
-        formChecks: (a, p) => {
-            const issues = [];
-            if (a.l_hip !== null && a.l_hip < 70) issues.push('torso_lean');
-            if (a.l_knee !== null && a.r_knee !== null && Math.abs(a.l_knee - a.r_knee) > 30) issues.push('asymmetric_knees');
-            if (p.l_knee_x && p.l_ankle_x) {
-                if (Math.abs(p.l_knee_x - p.l_ankle_x) > 0.15) issues.push('knee_past_toes');
-            }
-            return issues;
-        },
-        angleBadge: (a) => ({ val: a.l_knee, label: 'Knee' }),
-    },
-    plank: {
-        trackJoint: null, downThresh: 0, upThresh: 0,
-        positionValid: (p) => {
-            // Plank: body should be horizontal like pushup
-            if (p.l_shoulder_y && p.l_hip_y) {
-                const diff = Math.abs(p.l_shoulder_y - p.l_hip_y);
-                if (diff > 0.25) return false;
-            }
-            return true;
-        },
-        formChecks: (a, p) => {
-            const issues = [];
-            if (a.l_hip !== null && a.l_hip < 150) issues.push('hip_sag');
-            if (a.l_hip !== null && a.l_hip > 190) issues.push('hip_pike');
-            if (a.l_shoulder !== null && (a.l_shoulder < 70 || a.l_shoulder > 110)) issues.push('shoulder_misalign');
-            return issues;
-        },
-        angleBadge: (a) => ({ val: a.l_hip, label: 'Hip' }),
-    },
-};
-
-// ══════════════════════════════════════
-// PAIRING
-// ══════════════════════════════════════
-const cis = document.querySelectorAll('.ci');
-cis.forEach((inp, i) => {
-    inp.addEventListener('input', () => {
-        inp.value = inp.value.replace(/\D/g, '');
-        if (inp.value && i < 5) cis[i + 1].focus();
-        document.getElementById('pBtn').disabled = [...cis].map(x => x.value).join('').length !== 6;
-    });
-    inp.addEventListener('keydown', e => {
-        if (e.key === 'Backspace' && !inp.value && i > 0) cis[i - 1].focus();
-    });
-    inp.addEventListener('paste', e => {
-        e.preventDefault();
-        const txt = (e.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 6);
-        txt.split('').forEach((ch, j) => { if (cis[j]) cis[j].value = ch });
-        if (cis[Math.min(txt.length, 5)]) cis[Math.min(txt.length, 5)].focus();
-        document.getElementById('pBtn').disabled = txt.length !== 6;
-    });
-});
-
-async function doPair() {
-    const code = [...cis].map(x => x.value).join('');
-    const err = document.getElementById('pErr');
-    err.textContent = '';
-    try {
-        const r = await fetch(API + '/api/session/pair', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code })
-        });
-        const d = await r.json();
-        if (!r.ok) { err.textContent = 'Invalid code. Check your TV and try again.'; return; }
-        sid = d.sessionId;
-        goWorkout();
-    } catch (e) { err.textContent = 'Cannot reach server. Same WiFi as your TV?'; }
-}
-
-// ══════════════════════════════════════
-// WORKOUT INIT
-// ══════════════════════════════════════
-async function goWorkout() {
-    document.getElementById('pairS').classList.remove('on');
-    document.getElementById('wkS').classList.add('on');
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }
-        });
-        const vid = document.getElementById('cam');
-        vid.srcObject = stream;
-        await vid.play();
-    } catch (e) { alert('Camera access is required'); return; }
-
-    document.getElementById('wkStatus').textContent = 'Loading pose model…';
-    try {
-        await tf.setBackend('webgl');
-        await tf.ready();
-        detector = await poseDetection.createDetector(
-            poseDetection.SupportedModels.MoveNet,
-            { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING }
-        );
-        document.getElementById('loader').style.display = 'none';
-        document.getElementById('wkStatus').textContent = 'Pose model ready';
-        detectPose();
-    } catch (e) {
-        document.getElementById('loader').querySelector('.loader-txt').textContent = 'Pose model failed: ' + e.message;
-    }
-}
-
-// ══════════════════════════════════════
-// POSE DETECTION LOOP
-// ══════════════════════════════════════
-async function detectPose() {
-    const vid = document.getElementById('cam');
-    const canvas = document.getElementById('poseCanvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = vid.videoWidth || 640;
-    canvas.height = vid.videoHeight || 480;
-
-    if (detector && vid.readyState >= 2) {
-        try {
-            const poses = await detector.estimatePoses(vid);
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.save();
-            ctx.translate(canvas.width, 0);
-            ctx.scale(-1, 1);
-
-            if (poses.length > 0 && poses[0].keypoints) {
-                const kps = poses[0].keypoints;
-                lastPose = kps;
-                drawSkeleton(ctx, kps);
-                drawKeypoints(ctx, kps);
-                if (on) { processRep(kps); updateAngleBadge(kps); }
-                updateSilhouette(kps);
-            } else {
-                lastPose = null;
-                document.getElementById('silMsg').textContent = 'Step into frame';
-                document.getElementById('silMsg').classList.remove('ready');
-                document.getElementById('silOverlay').style.display = 'flex';
-            }
-            ctx.restore();
-        } catch (e) { /* skip */ }
-    }
-    rafId = requestAnimationFrame(detectPose);
-}
-
-// ══════════════════════════════════════
-// DRAWING
-// ══════════════════════════════════════
-function drawKeypoints(ctx, kps) {
-    for (const kp of kps) {
-        if (kp.score < 0.3) continue;
-        ctx.beginPath();
-        ctx.arc(kp.x, kp.y, 5, 0, 2 * Math.PI);
-        ctx.fillStyle = kp.score > 0.5 ? '#4ade80' : '#facc15';
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(kp.x, kp.y, 8, 0, 2 * Math.PI);
-        ctx.strokeStyle = kp.score > 0.5 ? 'rgba(74,222,128,0.3)' : 'rgba(250,204,21,0.3)';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-    }
-}
-
-function drawSkeleton(ctx, kps) {
-    ctx.lineWidth = 3;
-    for (const [i, j] of SKELETON) {
-        const a = kps[i], b = kps[j];
-        if (a.score < 0.3 || b.score < 0.3) continue;
-        ctx.beginPath();
-        ctx.moveTo(a.x, a.y);
-        ctx.lineTo(b.x, b.y);
-        ctx.strokeStyle = 'rgba(74,222,128,0.5)';
-        ctx.stroke();
-    }
-}
-
-// ══════════════════════════════════════
-// SILHOUETTE CHECK
-// ══════════════════════════════════════
-function updateSilhouette(kps) {
-    if (on) { document.getElementById('silOverlay').style.display = 'none'; return; }
-    const overlay = document.getElementById('silOverlay');
-    const msg = document.getElementById('silMsg');
-    overlay.style.display = 'flex';
-    const required = [KP.L_SHOULDER, KP.R_SHOULDER, KP.L_HIP, KP.R_HIP, KP.L_KNEE, KP.R_KNEE];
-    const visible = required.filter(i => kps[i].score > 0.4).length;
-
-    if (visible >= 5) {
-        const now = Date.now();
-        if (silLockStart === 0) silLockStart = now;
-        const elapsed = (now - silLockStart) / 1000;
-        const remaining = Math.ceil(3 - elapsed);
-
-        if (elapsed >= 3 && !autoStarting) {
-            // Auto-start the workout
-            autoStarting = true;
-            msg.textContent = '✓ Calibrated — starting workout';
-            msg.classList.add('ready');
-            setTimeout(() => { autoStarting = false; toggle(); }, 500);
-        } else if (!autoStarting) {
-            msg.textContent = remaining > 0
-                ? 'Hold still — calibrating... ' + remaining + 's'
-                : '✓ Locked in — starting...';
-            msg.classList.add('ready');
+        const appId = 'couchcoachhackathon';
+        
+        let app, auth, db;
+        if (Object.keys(firebaseConfig).length > 0) {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            signInAnonymously(auth);
         }
-    } else {
-        silLockStart = 0;
-        autoStarting = false;
-        msg.textContent = 'Move back so your full body is visible (' + visible + '/6 points)';
-        msg.classList.remove('ready');
-    }
-}
 
-// ══════════════════════════════════════
-// MATH HELPERS
-// ══════════════════════════════════════
-function angle(a, b, c) {
-    const rad = Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(a.y - b.y, a.x - b.x);
-    let deg = Math.abs(rad * 180 / Math.PI);
-    if (deg > 180) deg = 360 - deg;
-    return deg;
-}
+        lucide.createIcons();
 
-function safeAngle(a, b, c) {
-    if (!a || !b || !c || a.score < 0.3 || b.score < 0.3 || c.score < 0.3) return null;
-    return Math.round(angle(a, b, c));
-}
+        document.getElementById('pin-input').addEventListener('input', function(e) {
+            this.value = this.value.toUpperCase();
+        });
 
-function computeAllAngles(kps) {
-    return {
-        l_elbow: safeAngle(kps[KP.L_SHOULDER], kps[KP.L_ELBOW], kps[KP.L_WRIST]),
-        r_elbow: safeAngle(kps[KP.R_SHOULDER], kps[KP.R_ELBOW], kps[KP.R_WRIST]),
-        l_shoulder: safeAngle(kps[KP.L_HIP], kps[KP.L_SHOULDER], kps[KP.L_ELBOW]),
-        r_shoulder: safeAngle(kps[KP.R_HIP], kps[KP.R_SHOULDER], kps[KP.R_ELBOW]),
-        l_hip: safeAngle(kps[KP.L_SHOULDER], kps[KP.L_HIP], kps[KP.L_KNEE]),
-        r_hip: safeAngle(kps[KP.R_SHOULDER], kps[KP.R_HIP], kps[KP.R_KNEE]),
-        l_knee: safeAngle(kps[KP.L_HIP], kps[KP.L_KNEE], kps[KP.L_ANKLE]),
-        r_knee: safeAngle(kps[KP.R_HIP], kps[KP.R_KNEE], kps[KP.R_ANKLE]),
-    };
-}
+        const rtcConfig = {
+            iceServers: [
+                { urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }
+            ]
+        };
 
-function computePositions(kps, w, h) {
-    const p = {};
-    const map = { l_knee_x: [KP.L_KNEE,'x'], r_knee_x: [KP.R_KNEE,'x'],
-        l_hip_x: [KP.L_HIP,'x'], r_hip_x: [KP.R_HIP,'x'],
-        l_hip_y: [KP.L_HIP,'y'], r_hip_y: [KP.R_HIP,'y'],
-        l_shoulder_y: [KP.L_SHOULDER,'y'], r_shoulder_y: [KP.R_SHOULDER,'y'],
-        l_ankle_x: [KP.L_ANKLE,'x'], r_ankle_x: [KP.R_ANKLE,'x'],
-        l_ankle_y: [KP.L_ANKLE,'y'], r_ankle_y: [KP.R_ANKLE,'y'],
-        l_knee_y: [KP.L_KNEE,'y'], r_knee_y: [KP.R_KNEE,'y'] };
-    for (const [k, [idx, axis]] of Object.entries(map)) {
-        if (kps[idx].score > 0.3) p[k] = kps[idx][axis] / (axis === 'x' ? w : h);
-    }
-    return p;
-}
+        function updateSyncStatus(text, color) {
+            const dot = document.getElementById('sync-dot');
+            const label = document.getElementById('sync-bar-text');
+            const bar = document.getElementById('sync-status-bar');
+            label.innerText = text;
+            label.className = `font-bold tracking-widest uppercase text-sm text-${color}`;
+            dot.className = `w-3 h-3 bg-${color} rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]`;
+            if (color === 'red-500') {
+                bar.className = 'absolute bottom-12 bg-app-surface/80 backdrop-blur-xl px-8 py-4 rounded-full border border-red-500/50 flex items-center gap-4 shadow-2xl';
+            } else if (color === 'green-400') {
+                bar.className = 'absolute bottom-12 bg-app-surface/80 backdrop-blur-xl px-8 py-4 rounded-full border border-green-400/50 flex items-center gap-4 shadow-2xl';
+            } else {
+                bar.className = 'absolute bottom-12 bg-app-surface/80 backdrop-blur-xl px-8 py-4 rounded-full border border-app-cyan/50 flex items-center gap-4 shadow-2xl';
+            }
+        }
 
-function buildSnapshot(kps, angles, w, h) {
-    const pos = {};
-    const names = ['nose','l_eye','r_eye','l_ear','r_ear',
-        'l_shoulder','r_shoulder','l_elbow','r_elbow','l_wrist','r_wrist',
-        'l_hip','r_hip','l_knee','r_knee','l_ankle','r_ankle'];
-    for (let i = 0; i < kps.length; i++) {
-        if (kps[i].score > 0.3) pos[names[i]] = [+(kps[i].x / w).toFixed(3), +(kps[i].y / h).toFixed(3)];
-    }
-    return { positions: pos, angles: { ...angles } };
-}
+        window.syncToTV = async function() {
+            const pin = document.getElementById('pin-input').value.trim();
+            if(pin.length !== 6) return alert("Please enter a 6 character PIN");
 
-// ══════════════════════════════════════
-// REP COUNTING + REAL-TIME FORM
-// ══════════════════════════════════════
-function processRep(kps) {
-    const cfg = EX_CONFIG[ex];
-    const w = document.getElementById('cam').videoWidth || 640;
-    const h = document.getElementById('cam').videoHeight || 480;
-    const now = Date.now();
-    const angles = computeAllAngles(kps);
-    const positions = computePositions(kps, w, h);
+            if (!db || !auth.currentUser) {
+                alert("Firebase not configured properly. Waiting for auth...");
+                return;
+            }
 
-    // ── PLANK: no reps, continuous monitoring ──
-    if (ex === 'plank') {
-        if (now - lastFormCheckTime > 1500) {
-            lastFormCheckTime = now;
-            const issues = cfg.formChecks(angles, positions);
-            if (issues.length > 0) {
-                sendKeypointAnalysis({
-                    exercise: ex, phase: 'hold',
-                    current: buildSnapshot(kps, angles, w, h),
-                    issues: issues
+            const btn = document.getElementById('sync-btn');
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Establishing Link...`;
+            lucide.createIcons();
+
+            try {
+                // Verify the session exists before starting camera
+                const sessionRef = doc(db, 'artifacts', appId, 'public', 'data', 'sessions', pin);
+                const sessionSnap = await getDoc(sessionRef);
+                
+                if (!sessionSnap.exists()) {
+                    alert("Invalid PIN. No active session found. Check the code on your TV.");
+                    btn.innerHTML = `<i data-lucide="cast" class="w-5 h-5"></i> Sync with TV`;
+                    lucide.createIcons();
+                    return;
+                }
+
+                // Start the phone's camera
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }, 
+                    audio: false 
                 });
-            } else {
-                showFB('Solid hold — keep it up! 💪', 'good');
-                updScore('good');
-                sendGoodRep();
+                document.getElementById('phone-camera').srcObject = stream;
+
+                // Switch to camera view
+                document.getElementById('sync-view').classList.add('hidden');
+                document.getElementById('active-view').classList.remove('hidden');
+                document.getElementById('active-view').classList.add('flex');
+                updateSyncStatus('Connecting to TV...', 'amber-400');
+
+                // Setup WebRTC
+                const pc = new RTCPeerConnection(rtcConfig);
+                
+                // Add camera tracks to the connection
+                stream.getTracks().forEach(track => {
+                    pc.addTrack(track, stream);
+                    console.log("Phone: Added track:", track.kind);
+                });
+
+                // Monitor connection state
+                pc.onconnectionstatechange = () => {
+                    console.log("Phone: Connection state:", pc.connectionState);
+                    if (pc.connectionState === 'connected') {
+                        updateSyncStatus('Live Syncing to TV', 'green-400');
+                    } else if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
+                        updateSyncStatus('Connection Lost', 'red-500');
+                    }
+                };
+
+                pc.oniceconnectionstatechange = () => {
+                    console.log("Phone: ICE state:", pc.iceConnectionState);
+                };
+
+                const callerCandidatesCollection = collection(sessionRef, 'callerCandidates');
+
+                // Collect ICE candidates
+                const pendingCandidates = [];
+                let iceDone = false;
+
+                pc.onicecandidate = event => {
+                    if (event.candidate) {
+                        console.log("Phone: ICE candidate generated");
+                        addDoc(callerCandidatesCollection, event.candidate.toJSON());
+                    } else {
+                        console.log("Phone: All ICE candidates gathered");
+                        iceDone = true;
+                    }
+                };
+
+                // Create offer
+                const offerDescription = await pc.createOffer();
+                await pc.setLocalDescription(offerDescription);
+                console.log("Phone: Offer created and set as local description");
+
+                const offer = {
+                    sdp: offerDescription.sdp,
+                    type: offerDescription.type,
+                };
+
+                // Write offer to Firestore — this triggers the TV to respond
+                await updateDoc(sessionRef, { offer, status: 'connected' });
+                console.log("Phone: Offer written to Firestore");
+
+                // Listen for the TV's answer
+                const answerUnsub = onSnapshot(sessionRef, (snapshot) => {
+                    const data = snapshot.data();
+                    if (data && data.answer && !pc.currentRemoteDescription) {
+                        console.log("Phone: Received TV answer");
+                        pc.setRemoteDescription(new RTCSessionDescription(data.answer))
+                            .then(() => console.log("Phone: Remote description set successfully"))
+                            .catch(e => console.error("Phone: Error setting remote description:", e));
+                    }
+                });
+
+                // Listen for the TV's ICE candidates
+                const calleeCandidatesCollection = collection(sessionRef, 'calleeCandidates');
+                const candidateUnsub = onSnapshot(calleeCandidatesCollection, (snapshot) => {
+                    snapshot.docChanges().forEach((change) => {
+                        if (change.type === 'added') {
+                            const data = change.doc.data();
+                            console.log("Phone: Received TV ICE candidate");
+                            pc.addIceCandidate(new RTCIceCandidate(data))
+                                .catch(e => console.error("Phone: Error adding ICE candidate:", e));
+                        }
+                    });
+                });
+
+            } catch(e) {
+                console.error("Sync error:", e);
+                alert("Failed to sync camera. Ensure camera permissions are granted and the PIN is correct.");
+                btn.innerHTML = `<i data-lucide="cast" class="w-5 h-5"></i> Sync with TV`;
+                lucide.createIcons();
+                // Reset views if we switched
+                document.getElementById('active-view').classList.add('hidden');
+                document.getElementById('active-view').classList.remove('flex');
+                document.getElementById('sync-view').classList.remove('hidden');
             }
         }
-        return;
-    }
+    </script>
 
-    // ── Exercises with reps ──
-    const trackAngle = angles[cfg.trackJoint];
-    if (trackAngle === null) return;
+    <!-- Pose Tracking + Rep Counting + Bedrock Analysis -->
+    <script>
+        const CC_API = location.origin;
+        let poseDetector = null;
+        let exercise = 'pushup', repCount = 0, repPhase = 'up';
+        let bedrockBusy = false, repData = { snapshots: [], issues: [], hadBadForm: false };
+        let lastFormCheckTime = 0, angleHistory = [], failedRepCooldown = 0;
+        let silLockStart = 0, autoStarted = false;
 
-    // Check body position is valid for this exercise
-    if (cfg.positionValid && !cfg.positionValid(positions)) {
-        // Wrong body orientation — don't count anything
-        if (repPhase === 'down') {
-            // Was mid-rep but position became invalid
-            showFB('Get into ' + ex + ' position', 'warning');
-            updScore('warning');
+        const KP = { NOSE:0,L_EYE:1,R_EYE:2,L_EAR:3,R_EAR:4,L_SHOULDER:5,R_SHOULDER:6,L_ELBOW:7,R_ELBOW:8,L_WRIST:9,R_WRIST:10,L_HIP:11,R_HIP:12,L_KNEE:13,R_KNEE:14,L_ANKLE:15,R_ANKLE:16 };
+        const SKELETON = [[5,6],[5,7],[7,9],[6,8],[8,10],[5,11],[6,12],[11,12],[11,13],[13,15],[12,14],[14,16]];
+
+        const EX_CONFIG = {
+            pushup: { joint:'l_elbow', down:100, up:150,
+                posValid: p => p.l_shoulder_y && p.l_hip_y ? Math.abs(p.l_shoulder_y-p.l_hip_y)<0.25 : true,
+                checks: (a,p) => { const i=[]; if(a.l_hip!==null&&a.l_hip<150)i.push('hip_sag'); if(a.l_shoulder!==null&&a.l_shoulder>80)i.push('elbows_flaring'); return i; },
+                badge: a => ({val:a.l_elbow,label:'Elbow'})
+            },
+            squat: { joint:'l_knee', down:100, up:155,
+                posValid: p => p.l_shoulder_y && p.l_hip_y ? p.l_shoulder_y<p.l_hip_y : true,
+                checks: (a,p) => { const i=[]; if(a.l_hip!==null&&a.l_knee!==null&&a.l_hip<60&&a.l_knee<110)i.push('forward_lean'); if(p.l_knee_x&&p.r_knee_x&&p.l_hip_x&&p.r_hip_x&&Math.abs(p.l_knee_x-p.r_knee_x)<Math.abs(p.l_hip_x-p.r_hip_x)*0.7)i.push('knees_caving'); return i; },
+                badge: a => ({val:a.l_knee,label:'Knee'})
+            },
+            lunge: { joint:'l_knee', down:100, up:155,
+                posValid: p => p.l_shoulder_y && p.l_hip_y ? p.l_shoulder_y<p.l_hip_y : true,
+                checks: (a,p) => { const i=[]; if(a.l_hip!==null&&a.l_hip<70)i.push('torso_lean'); return i; },
+                badge: a => ({val:a.l_knee,label:'Knee'})
+            },
+            plank: { joint:null, down:0, up:0,
+                posValid: p => p.l_shoulder_y && p.l_hip_y ? Math.abs(p.l_shoulder_y-p.l_hip_y)<0.25 : true,
+                checks: (a,p) => { const i=[]; if(a.l_hip!==null&&a.l_hip<150)i.push('hip_sag'); if(a.l_hip!==null&&a.l_hip>190)i.push('hip_pike'); return i; },
+                badge: a => ({val:a.l_hip,label:'Hip'})
+            }
+        };
+
+        function angle(a,b,c){ const r=Math.atan2(c.y-b.y,c.x-b.x)-Math.atan2(a.y-b.y,a.x-b.x); let d=Math.abs(r*180/Math.PI); if(d>180)d=360-d; return d; }
+        function safeAngle(a,b,c){ if(!a||!b||!c||a.score<0.3||b.score<0.3||c.score<0.3)return null; return Math.round(angle(a,b,c)); }
+        function computeAngles(kps){ return { l_elbow:safeAngle(kps[5],kps[7],kps[9]), r_elbow:safeAngle(kps[6],kps[8],kps[10]), l_shoulder:safeAngle(kps[11],kps[5],kps[7]), r_shoulder:safeAngle(kps[12],kps[6],kps[8]), l_hip:safeAngle(kps[5],kps[11],kps[13]), r_hip:safeAngle(kps[6],kps[12],kps[14]), l_knee:safeAngle(kps[11],kps[13],kps[15]), r_knee:safeAngle(kps[12],kps[14],kps[16]) }; }
+        function computePos(kps,w,h){ const p={}; const m={l_knee_x:[13,'x'],r_knee_x:[14,'x'],l_hip_x:[11,'x'],r_hip_x:[12,'x'],l_hip_y:[11,'y'],r_hip_y:[12,'y'],l_shoulder_y:[5,'y'],r_shoulder_y:[6,'y']}; for(const[k,[i,ax]]of Object.entries(m)){if(kps[i].score>0.3)p[k]=kps[i][ax]/(ax==='x'?w:h);} return p; }
+
+        function drawPose(ctx,kps){
+            ctx.lineWidth=3;
+            for(const[i,j]of SKELETON){ const a=kps[i],b=kps[j]; if(a.score<0.3||b.score<0.3)continue; ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle='rgba(66,213,230,0.5)';ctx.stroke(); }
+            for(const kp of kps){ if(kp.score<0.3)continue; ctx.beginPath();ctx.arc(kp.x,kp.y,5,0,2*Math.PI);ctx.fillStyle=kp.score>0.5?'#42d5e6':'#facc15';ctx.fill(); ctx.beginPath();ctx.arc(kp.x,kp.y,8,0,2*Math.PI);ctx.strokeStyle=kp.score>0.5?'rgba(66,213,230,0.3)':'rgba(250,204,21,0.3)';ctx.lineWidth=2;ctx.stroke(); }
         }
-        return;
-    }
 
-    // Track angle history for failed rep detection
-    angleHistory.push({ angle: trackAngle, time: now });
-    if (angleHistory.length > 60) angleHistory.shift();
-
-    // Continuous mid-rep form check every 300ms
-    if (now - lastFormCheckTime > 300) {
-        lastFormCheckTime = now;
-        const snapshot = buildSnapshot(kps, angles, w, h);
-        repData.snapshots.push(snapshot);
-        if (repData.snapshots.length > 20) repData.snapshots.shift();
-
-        const issues = cfg.formChecks(angles, positions);
-        if (issues.length > 0) {
-            repData.hadBadForm = true;
-            repData.issues.push(...issues);
+        function processRep(kps,w,h){
+            const cfg=EX_CONFIG[exercise]; const now=Date.now();
+            const angles=computeAngles(kps); const positions=computePos(kps,w,h);
+            if(exercise==='plank'){ if(now-lastFormCheckTime>1500){lastFormCheckTime=now; const issues=cfg.checks(angles,positions); if(issues.length>0)sendAnalysis({exercise,phase:'hold',issues});} return; }
+            const ta=angles[cfg.joint]; if(ta===null)return;
+            if(cfg.posValid&&!cfg.posValid(positions))return;
+            angleHistory.push({angle:ta,time:now}); if(angleHistory.length>60)angleHistory.shift();
+            if(now-lastFormCheckTime>300){lastFormCheckTime=now; const issues=cfg.checks(angles,positions); if(issues.length>0){repData.hadBadForm=true;repData.issues.push(...issues);}}
+            if(repPhase==='up'&&ta<cfg.down){repPhase='down';}
+            else if(repPhase==='down'&&ta>cfg.up){repPhase='up';repCount++;sendRep();
+                if(repData.hadBadForm){sendAnalysis({rep:repCount,exercise,issues_detected:[...new Set(repData.issues)]});}else{sendRep({text:'Good rep!',score:'good'});}
+                repData={snapshots:[],issues:[],hadBadForm:false};
+            }
+            if(repPhase==='up'&&now-failedRepCooldown>3000&&angleHistory.length>15){
+                const recent=angleHistory.slice(-15).map(a=>a.angle);const mn=Math.min(...recent);const cur=recent[recent.length-1];const st=recent[0];
+                if(st>cfg.up-10&&mn>cfg.down&&mn<cfg.down+30&&cur>mn+15){failedRepCooldown=now;angleHistory=[];sendAnalysis({exercise,phase:'failed_rep',min_angle:Math.round(mn),threshold:cfg.down,issues:['insufficient_depth']});repData={snapshots:[],issues:[],hadBadForm:false};}
+            }
         }
-    }
 
-    // ── Rep phase detection ──
-    if (repPhase === 'up' && trackAngle < cfg.downThresh) {
-        repPhase = 'down';
-    } else if (repPhase === 'down' && trackAngle > cfg.upThresh) {
-        repPhase = 'up';
-        repCount++;
-        document.getElementById('reps').textContent = repCount;
-        sendRepUpdate();
-        angleHistory = [];
-        failedRepCooldown = 0;
-
-        if (repData.hadBadForm) {
-            sendKeypointAnalysis({
-                rep: repCount, exercise: ex,
-                snapshots: repData.snapshots.slice(-6),
-                issues_detected: [...new Set(repData.issues)],
-            });
-        } else {
-            showFB('Good rep! 💪', 'good');
-            updScore('good');
-            sendGoodRep();
+        async function sendRep(feedback){
+            try{await fetch(CC_API+'/api/session/rep',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'phone',reps:repCount,exercise,feedback:feedback||undefined})});}catch(e){}
         }
-        repData = { snapshots: [], issues: [], hadBadForm: false };
-    }
-
-    // ── Failed rep detection (insufficient depth) ──
-    if (repPhase === 'up' && now - failedRepCooldown > 3000 && angleHistory.length > 15) {
-        const recent = angleHistory.slice(-15).map(a => a.angle);
-        const minAngle = Math.min(...recent);
-        const currentAngle = recent[recent.length - 1];
-        const startAngle = recent[0];
-
-        // Started high, went down but not enough, came back up
-        if (startAngle > cfg.upThresh - 10 && minAngle > cfg.downThresh && minAngle < cfg.downThresh + 30 && currentAngle > minAngle + 15) {
-            failedRepCooldown = now;
-            angleHistory = [];
-
-            const jointName = cfg.trackJoint.includes('knee') ? 'knee' : 'elbow';
-            showFB('Go deeper — ' + jointName + ' reached ' + Math.round(minAngle) + '°, need ' + cfg.downThresh + '°', 'warning');
-            updScore('warning');
-
-            sendKeypointAnalysis({
-                exercise: ex, phase: 'failed_rep',
-                min_angle_reached: Math.round(minAngle),
-                threshold_needed: cfg.downThresh,
-                snapshots: repData.snapshots.slice(-4),
-                issues_detected: ['insufficient_depth'],
-            });
-            repData = { snapshots: [], issues: [], hadBadForm: false };
+        async function sendAnalysis(data){
+            if(bedrockBusy)return;bedrockBusy=true;
+            try{await fetch(CC_API+'/api/session/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'phone',keypoints:data})});}catch(e){}
+            bedrockBusy=false;
         }
-    }
-}
 
-function updateAngleBadge(kps) {
-    const badge = document.getElementById('angleBadge');
-    if (!on) { badge.style.display = 'none'; return; }
-    const cfg = EX_CONFIG[ex];
-    const angles = computeAllAngles(kps);
-    const info = cfg.angleBadge(angles);
-    if (info.val !== null) {
-        badge.style.display = 'block';
-        badge.textContent = info.label + ': ' + Math.round(info.val) + '°';
-        badge.style.color = info.val < 100 ? 'var(--g)' : info.val < 150 ? 'var(--y)' : 'var(--dm)';
-    } else {
-        badge.style.display = 'none';
-    }
-}
+        async function initPoseDetection(){
+            try{
+                await tf.setBackend('webgl');await tf.ready();
+                poseDetector=await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet,{modelType:poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING});
+                console.log('Pose model loaded');
+                runPoseLoop();
+            }catch(e){console.error('Pose model failed:',e);}
+        }
 
-// ══════════════════════════════════════
-// SERVER COMMUNICATION
-// ══════════════════════════════════════
-async function sendRepUpdate() {
-    try {
-        await fetch(API + '/api/session/rep', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionId: sid, reps: repCount, exercise: ex })
+        async function runPoseLoop(){
+            const vid=document.getElementById('phone-camera');
+            const canvas=document.getElementById('poseCanvas');
+            const ctx=canvas.getContext('2d');
+            canvas.width=vid.videoWidth||640;canvas.height=vid.videoHeight||480;
+            if(poseDetector&&vid.readyState>=2){
+                try{
+                    const poses=await poseDetector.estimatePoses(vid);
+                    ctx.clearRect(0,0,canvas.width,canvas.height);
+                    if(poses.length>0&&poses[0].keypoints){
+                        const kps=poses[0].keypoints;
+                        drawPose(ctx,kps);
+                        processRep(kps,canvas.width,canvas.height);
+                    }
+                }catch(e){}
+            }
+            requestAnimationFrame(runPoseLoop);
+        }
+
+        // Start pose detection when camera becomes active
+        const camObserver=new MutationObserver(()=>{
+            const av=document.getElementById('active-view');
+            if(av&&!av.classList.contains('hidden')&&!poseDetector){
+                setTimeout(initPoseDetection,1000);
+            }
         });
-    } catch (e) {}
-}
-
-async function sendGoodRep() {
-    try {
-        await fetch(API + '/api/session/rep', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionId: sid, reps: repCount, exercise: ex,
-                feedback: { text: 'Good rep! 💪', score: 'good' } })
-        });
-    } catch (e) {}
-}
-
-async function sendKeypointAnalysis(keypointData) {
-    if (bedrockBusy) return;
-    bedrockBusy = true;
-    try {
-        const r = await fetch(API + '/api/session/analyze', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionId: sid, keypoints: keypointData })
-        });
-        const d = await r.json();
-        showFB(d.feedback, d.score);
-        updScore(d.score);
-    } catch (e) {}
-    bedrockBusy = false;
-}
-
-// ══════════════════════════════════════
-// EXERCISE PICKER
-// ══════════════════════════════════════
-function pickEx(el) {
-    document.querySelectorAll('.ex').forEach(b => b.classList.remove('sel'));
-    el.classList.add('sel'); ex = el.dataset.e;
-}
-
-// ══════════════════════════════════════
-// WORKOUT TOGGLE
-// ══════════════════════════════════════
-async function toggle() {
-    const btn = document.getElementById('actBtn');
-    if (!on) {
-        await fetch(API + '/api/session/start', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionId: sid, exercise: ex })
-        });
-        on = true; repCount = 0; repPhase = 'up';
-        repData = { snapshots: [], issues: [], hadBadForm: false };
-        angleHistory = []; failedRepCooldown = 0; lastFormCheckTime = 0;
-        document.getElementById('reps').textContent = '0';
-        btn.textContent = 'Stop Workout'; btn.className = 'act stop';
-        t0 = Date.now(); tmInt = setInterval(updTimer, 1000);
-        document.getElementById('silOverlay').style.display = 'none';
-    } else {
-        await fetch(API + '/api/session/stop', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionId: sid })
-        });
-        on = false; btn.textContent = 'Start Workout'; btn.className = 'act go';
-        clearInterval(tmInt);
-        silLockStart = 0; autoStarting = false;
-        document.getElementById('toast').classList.remove('vis');
-        document.getElementById('angleBadge').style.display = 'none';
-    }
-}
-
-// ══════════════════════════════════════
-// UI HELPERS
-// ══════════════════════════════════════
-function showFB(text, sc) {
-    const t = document.getElementById('toast');
-    document.getElementById('toastT').textContent = text;
-    document.getElementById('toastM').textContent = ex.toUpperCase() + ' · Rep ' + repCount;
-    t.classList.add('vis');
-    setTimeout(() => t.classList.remove('vis'), 3500);
-}
-
-function updScore(sc) {
-    const el = document.getElementById('score');
-    const m = { good: '✓', warning: '~', bad: '✗' };
-    const c = { good: 'var(--g)', warning: 'var(--y)', bad: 'var(--r)' };
-    el.textContent = m[sc] || '—'; el.style.color = c[sc] || 'var(--tx)';
-}
-
-function updTimer() {
-    const s = Math.floor((Date.now() - t0) / 1000), m = Math.floor(s / 60);
-    document.getElementById('timer').textContent = m + ':' + String(s % 60).padStart(2, '0');
-}
-</script>
+        camObserver.observe(document.getElementById('active-view'),{attributes:true,attributeFilter:['class']});
+    </script>
 </body>
 </html>
