@@ -457,7 +457,11 @@
 
             <!-- AI Feedback Floating Banner (Centered above dashboard) -->
             <div class="relative z-10 flex-1 flex flex-col items-center justify-end pb-8">
-                 <div class="bg-app-cyan text-app-bg px-8 py-4 rounded-2xl shadow-[0_15px_40px_rgba(66,213,230,0.3)] flex items-center gap-4 transform transition-all animate-bounce">
+                 <!-- Alexa Blue Ring -->
+                 <div id="alexa-ring" class="mb-6 w-20 h-20 rounded-full border-4 border-blue-500 opacity-0 transition-opacity duration-300 flex items-center justify-center" style="box-shadow: 0 0 30px rgba(59,130,246,0.5), inset 0 0 20px rgba(59,130,246,0.2);">
+                     <div class="w-14 h-14 rounded-full border-2 border-blue-400 animate-ping opacity-30"></div>
+                 </div>
+                 <div id="feedback-banner" class="bg-app-cyan text-app-bg px-8 py-4 rounded-2xl shadow-[0_15px_40px_rgba(66,213,230,0.3)] flex items-center gap-4 transform transition-all animate-bounce">
                     <i data-lucide="zap" class="w-8 h-8 fill-current"></i>
                     <span class="font-display text-2xl lg:text-3xl font-black tracking-wide uppercase">Keep your elbows tucked!</span>
                  </div>
@@ -855,12 +859,35 @@
             ccLastSpokenFeedback = text;
             ccSpeaking = true;
             try {
+                // Show Alexa blue ring
+                const ring = document.getElementById('alexa-ring');
+                if (ring) ring.style.opacity = '1';
+
+                // Play Alexa-style chime first
+                const chime = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YVoGAACAgoSGiIqMjo+RkpSVl5iZmpubnJycnJybm5qZmJeWlJOSkI+NjIqIhoWDgYB+fXt6eHd2dXR0c3NycnJycnJyc3N0dHV2d3h5e3x+f4GChIaHiYuMjo+RkpSVl5iZmpubnJycnJybm5qZmJeWlJOSkI+NjIqIhoWDgYB+fXt6eHd2dXR0c3NycnJycnJyc3N0dHV2d3h5e3x+gA==');
+                chime.volume = 0.3;
+                await chime.play().catch(() => {});
+
+                // Small delay after chime
+                await new Promise(r => setTimeout(r, 400));
+
+                // Speak via Polly
                 const url = CC_API + '/api/speech?text=' + encodeURIComponent(text);
                 const audio = new Audio(url);
-                audio.onended = () => { ccSpeaking = false; };
-                audio.onerror = () => { ccSpeaking = false; };
+                audio.onended = () => {
+                    ccSpeaking = false;
+                    if (ring) ring.style.opacity = '0';
+                };
+                audio.onerror = () => {
+                    ccSpeaking = false;
+                    if (ring) ring.style.opacity = '0';
+                };
                 await audio.play();
-            } catch(e) { ccSpeaking = false; }
+            } catch(e) {
+                ccSpeaking = false;
+                const ring = document.getElementById('alexa-ring');
+                if (ring) ring.style.opacity = '0';
+            }
         }
 
         function startWorkoutConnection() {
@@ -1023,6 +1050,67 @@
             
             generateDynamicRows();
             lucide.createIcons();
+
+            // Start Alexa voice input when workout view opens
+            function startAlexaListening() {
+                const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!SR) return;
+                const recognition = new SR();
+                recognition.continuous = true;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+
+                recognition.onresult = (e) => {
+                    const last = e.results[e.results.length - 1];
+                    if (!last.isFinal) return;
+                    const transcript = last[0].transcript.trim().toLowerCase();
+                    if (transcript.includes('alexa')) {
+                        const parts = transcript.split('alexa');
+                        const question = parts.slice(1).join('alexa').trim();
+                        if (question.length > 2) {
+                            handleAlexaQuestion(question);
+                        } else {
+                            ccSpeakFeedback("I'm listening. What do you need?");
+                        }
+                    }
+                };
+
+                recognition.onend = () => {
+                    if (!ccSpeaking) setTimeout(() => { try { recognition.start(); } catch(e) {} }, 300);
+                };
+                recognition.onerror = (e) => {
+                    if (e.error !== 'not-allowed') setTimeout(() => { try { recognition.start(); } catch(e) {} }, 1000);
+                };
+                try { recognition.start(); } catch(e) {}
+            }
+
+            async function handleAlexaQuestion(question) {
+                const ring = document.getElementById('alexa-ring');
+                if (ring) ring.style.opacity = '1';
+                try {
+                    const r = await fetch(CC_API + '/api/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ question, code: ccSessionCode })
+                    });
+                    const d = await r.json();
+                    const banner = document.querySelector('#feedback-banner span');
+                    if (banner) banner.textContent = d.answer;
+                    ccLastSpokenFeedback = '';
+                    await ccSpeakFeedback(d.answer);
+                } catch(e) {
+                    await ccSpeakFeedback("Sorry, I didn't catch that.");
+                }
+            }
+
+            // Auto-start listening when workout view becomes active
+            const observer = new MutationObserver(() => {
+                const wv = document.getElementById('workout-view');
+                if (wv && wv.classList.contains('view-active')) {
+                    startAlexaListening();
+                }
+            });
+            observer.observe(document.getElementById('workout-view'), { attributes: true, attributeFilter: ['class'] });
 
             document.addEventListener('keydown', (e) => {
                 const isOverlay = currentViewId === 'connect-view' || currentViewId === 'workout-view';
