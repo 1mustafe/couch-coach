@@ -1026,22 +1026,14 @@
                 this._speaking = false;
                 this._lastFeedback = '';
 
-                // Scripted demo sequence — press Space/Enter to advance each rep
-                // Set 1: 5 reps (rep1=bad shoulders, rep2=bad legs, rep3-5=good)
-                // Set 2: 5 reps (all good)
+                // Scripted demo: 2 squats (1 bad, 1 good) then 2 pushups (1 bad, 1 good)
                 this._demoScript = [
-                    // Set 1
-                    { rep:1, set:1, score:55, type:'error', feedback:"Your shoulders are flaring out. Tuck your elbows closer to your body for better activation." },
-                    { rep:2, set:1, score:62, type:'warning', feedback:"Legs are too far apart. Bring your feet closer together, about hip width." },
-                    { rep:3, set:1, score:85, type:'info', feedback:"Good rep. Two more to go, keep that form tight." },
-                    { rep:4, set:1, score:90, type:'info', feedback:"Nice work, much better form. One more." },
-                    { rep:5, set:1, score:94, type:'info', feedback:"Great rep. Set one complete. Take a short rest." },
-                    // Set 2
-                    { rep:1, set:2, score:88, type:'info', feedback:"Set two. Good starting position, lets go." },
-                    { rep:2, set:2, score:91, type:'info', feedback:"Solid form, keep it up." },
-                    { rep:3, set:2, score:93, type:'info', feedback:"Three down, two to go. Looking strong." },
-                    { rep:4, set:2, score:95, type:'info', feedback:"Almost there, maintain that form." },
-                    { rep:5, set:2, score:98, type:'info', feedback:"Perfect finish. Workout complete, great session." },
+                    // Squats
+                    { rep:1, set:1, score:58, type:'warning', feedback:"Knees are caving inward. Push them out over your toes." },
+                    { rep:2, set:1, score:91, type:'info', feedback:"Much better. Good depth, knees tracking nicely." },
+                    // Pushups
+                    { rep:3, set:1, score:60, type:'error', feedback:"Hips are sagging. Tighten your core and keep a straight line." },
+                    { rep:4, set:1, score:95, type:'info', feedback:"Great pushup. Solid form, strong finish." },
                 ];
 
                 // Timer for elapsed time
